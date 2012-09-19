@@ -18,7 +18,7 @@ targetRxns = {
     'EX_succ(e)'
     'EX_ac(e)'
              };
-koNum = 2;
+koNum = 3;
 
 for i = 1:length(targetRxns)
     status = sprintf('%d: %s', i, targetRxns{i});
