@@ -4,13 +4,13 @@ function loopOptSwapWithSwaps
 cleaner = onCleanup(@() cleanup);
 global run status
 status = 'starting';
-run = '3 knocks after 4 swaps';
+run = '5 knocks after 5 swaps';
     
 swaps = {
-    {'EAR60x';'GLUDy';'ME1';'TRSARr';}
-    {'3OAR40';'G6PDH2r';'GLUDy';'TRSARr';}
-    {'G6PDH2r';'MDH';'MTHFD';'PDH';}
-    {'GLUDy';'MDH';'PDH';'PGCD';}
+    {'3OAR40';'3OAR80';'GLUDy';'LCARR';'ME1';}
+    {'3OAR40';'EAR60x';'G6PDH2r';'GLUDy';'TRSARr';}
+    {'G6PDH2r';'LCARR';'MDH';'MTHFD';'PDH';}
+    {'GLUDy';'GND';'LCARR';'MDH';'PGCD';}
         };  
 targetRxns = {
     'EX_etoh(e)'
@@ -18,7 +18,7 @@ targetRxns = {
     'EX_succ(e)'
     'EX_ac(e)'
              };
-koNum = 3;
+koNum = 5;
 
 for i = 1:length(targetRxns)
     status = sprintf('%d: %s', i, targetRxns{i});
