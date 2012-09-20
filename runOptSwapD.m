@@ -181,8 +181,10 @@ function runOptSwapD(opt)
         myPrint('%s,', targetRxn);
         printMaxYield(modelWT,targetRxn);
         printMaxYield(modelT, targetRxn);
-        printCoupledYield(modelWT, targetRxn);
-        printCoupledYield(modelT, targetRxn);
+        solnWT = printCoupledYield(modelWT, targetRxn);
+        solnT = printCoupledYield(modelT, targetRxn);
+        printSsp(modelWT, targetRxn, solnWT);
+        printSsp(modelT, targetRxn, solnT);
         if ~isempty(knockouts)
             printReactions(knockouts);
         else
@@ -219,13 +221,29 @@ function printMaxYield(model, targetRxn)
     myPrint('%.4f,', soln.f);
 end
 
-function printCoupledYield(model, targetRxn)
+function soln = printCoupledYield(model, targetRxn)
     global biomassRxn
     model.c = zeros(size(model.c));
     model.c(ismember(model.rxns, biomassRxn)) = 1;
     soln = optimizeCbModel(model);
     if ~isempty(soln.x)
         myPrint('%.4f,', soln.x(ismember(model.rxns, targetRxn)));
+    else
+        myPrint('no sol,', []);
+    end
+end
+
+function printSsp(model, targetRxn, prevSoln)
+    if nargin < 3
+        global biomassRxn
+        model.c = zeros(size(model.c));
+        model.c(ismember(model.rxns, biomassRxn)) = 1;
+        soln = optimizeCbModel(model);
+    else
+        soln = prevSoln;
+    end
+    if ~isempty(soln.x)
+        myPrint('%.4f,', soln.x(ismember(model.rxns, targetRxn))*soln.f);
     else
         myPrint('no sol,', []);
     end
@@ -243,51 +261,3 @@ function myPrint(string, val)
     display(sprintf(string, val));
     fprintf(fileId, string, val);
 end
-
-% modelT = model;
-% modelT.c = zeros(size(model.c));
-% modelT.c(ismember(modelT.rxns, targetRxns{i})) = 1;
-% modelT.lb(ismember(modelT.rxns, biomassRxn)) = 0.01;
-% sol = optimizeCbModel(modelT);
-% maxProd{i} = sol.f
-
-% logFile = ['log-' run '.txt'];
-% fileId = fopen(logFile, 'a');
-% fprintf(fileId, '%s: %g\n', targetRxns{i}, sol.f);
-% fclose(fileId);
-
-
-% % write data file;
-% save(sprintf('%s_%d_%s',run, i, datestr(now, 'yy-mm-dd_HH_MM_SS')));
-% % write to log file
-% t = toc(ticID);
-% logFile = ['log-' run '.txt'];
-% fileId = fopen(logFile,'a');
-% fprintf(fileId,'%s: %s finished in %g min\n',...
-%                 datestr(now,'yy-mm-dd_HH_MM_SS'), run, t/60);
-
-% knockoutString = '';
-% for j=1:length(results.knockoutRxns)
-%     knockoutString = [knockoutString ' ' results.knockoutRxns{j}];
-% end
-% display(['knockouts: ', knockoutString]);
-% fprintf(fileId,'knocked rxns: %s\n', knockoutString);
-
-
-% newModel = changeRxnBounds(model, results.knockoutRxns, 0, 'b');
-% compareOptions.substrateRxn = 'EX_glc(e)';
-% compareOptions.targetRxn = options.targetRxn;
-% compareOptions.isAerobic = isAerobic;
-% compareOptions.pairwiseCompare = true;
-% compareOptions.showEnvelope = true;
-% output = compareModels({newModel, model}, compareOptions)
-% % TODO: print to file
-% % fprintf(fileId,'%s\n',output);
-
-% fclose(fileId);
-
-
-
-% try
-%     tw.updateStatus(sprintf('@zakandrewking %s finished', run));
-% end

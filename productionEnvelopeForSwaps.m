@@ -9,46 +9,31 @@ function productionEnvelopeForSwaps(targetRxns,swaps,kos)
 %
 % Zachary King 9/12/12
 
-    % cleaner = onCleanup(@() cleanup);
-    % global run status
+% cleaner = onCleanup(@() cleanup);
+% global run status
     status = 'starting';
     run = 'pipe test';
-    
+
     % check inputs
     if nargin < 1
-        targetRxns = {'EX_etoh(e)',
-                      'EX_for(e)',
-                      'EX_succ(e)',
-                      'EX_ac(e)',
-                      'EX_etoh(e)',
-                      'EX_for(e)',
-                      'EX_succ(e)',
-                      'EX_ac(e)'}
-          % targetRxn = 'EX_etoh(e)';
-
+        targetRxns = 'EX_ac(e)';
     end
     if nargin < 2
         swaps = {
             {}
+            {'GLUDy';'MDH';'PGCD';}
             {}
-            {}
-            {}
-            {'3OAR40';'3OAR80';'GLUDy';'LCARR';'ME1';}
-            {'3OAR40';'EAR60x';'G6PDH2r';'GLUDy';'TRSARr';}
-            {'G6PDH2r';'LCARR';'MDH';'MTHFD';'PDH';}
-            {'GLUDy';'GND';'LCARR';'MDH';'PGCD';}
+            {'GLUDy';'MDH';'PGCD';}
+            {'GLUDy';'GND';'LCARR';'MDH';'PGCD'}
                 };
     end
     if nargin < 3
         kos = {
-            {'EDA';'F6PA';'FBA';'FLDR2';'TALA';}
-            {'EDA';'F6PA';'PFK';'PGI';'TALA';}
-            {'DHAPT';'EDA';'PFL';'PGI';'PYK';}
-            {'EDA';'F6PA';'GHMT2r';'PGI';'TPI';}
             {}
             {}
-            {}
-            {}
+            {'DRPA';'F6PA';'TPI';}
+            {'EDA';'F6PA';'TPI';}
+            {'EDA';'F6PA';'PGM';'PPKr';'TPI';}
               };
     end
     if isempty(swaps)
@@ -63,7 +48,7 @@ function productionEnvelopeForSwaps(targetRxns,swaps,kos)
             targetRxns = [targetRxns; {aTargetRxn}];
         end
     end
-    
+
     % setup model
     keepWtDh = false;
     global biomassRxn
@@ -72,7 +57,7 @@ function productionEnvelopeForSwaps(targetRxns,swaps,kos)
     figure()
     hold on
     for i=1:length(targetRxns)
-        status = sprintf('run%d', i); 
+        status = sprintf('run%d', i);
         modelT = model;
         modelT = setupModelForTarget(modelT, targetRxns{i});
         if ~isempty(swaps{i})
@@ -93,7 +78,7 @@ function productionEnvelopeForSwaps(targetRxns,swaps,kos)
         end
         set(lineHandle,'DisplayName',[koStr '; ' swapStr '--' ...
                             targetRxns{i}]);
-        
+
         printCoupledYield(modelT, targetRxns{i});
     end
     legendH = legend;
