@@ -38,14 +38,14 @@ function maxYield
         model_K = model;
         switch m
           case 1
-            fprintf(fileId, 'wildtype,');
+            swapStr = 'wildtype';
           case 2
-            fprintf(fileId, 'THKO,');
+            swapStr = 'THKO';
             % knock out transhydrogenases
             thRxns = {'NADTRHD', 'THD2pp'};
             model_K = changeRxnBounds(model_K, thRxns, 0, 'b');
           case 3
-            fprint(fileId, 'DH-swap,');
+            swapStr = 'DH-swap';
             thRxns = {'NADTRHD', 'THD2pp'};
             model_K = changeRxnBounds(model_K, thRxns, 0, 'b');
             [model_K, newNames] = modelSwap(model_K, dhRxns, true);
@@ -53,14 +53,12 @@ function maxYield
 
         for i=1:length(substrateList) 
             substrate = substrateList{i}; 
-            fprintf(fileId, '%s',substrate);
             model_KS = model_K;
             model_KS = changeRxnBounds(model_KS, 'EX_glc(e)', 0, 'l');
             model_KS = changeRxnBounds(model_KS, substrate, -20, 'l');
 
             for j = 1:length(targetRxns) 
                 targetRxn = targetRxns{j};
-                fprintf(fileId, '%s,', targetRxn);
                 model_KST = model_KS;
                 model_KST = setupModelForTarget(model_KST, targetRxn);
                 model_KST.c = zeros(size(model_KST.c));
@@ -68,15 +66,15 @@ function maxYield
                 
                 for k = 1:length(growthMins) 
                     growthMin = growthMins(k);
-                    fprintf(fileId, '%d,', growthMin);
                     model_KSTG = model_KST; 
                     model_KSTG.lb(ismember(model_KSTG.rxns, biomassRxn)) = growthMin;
 
                     disp('running optimization');
-                    status = sprintf('%s, %s, min:%d', substrate, targetRxn, growthMin);
-                    % changeCobraSolverParams('MILP', 'printLevel', 3); 
+                    status = sprintf('%d, %s, %s, min: %.1f', m, substrate, targetRxn, growthMin); 
                     sol = optimizeCbModel(model_KSTG); 
                     out(m,i,j,k) = sol.f; 
+                    fprintf(fileId, '%s,%s,%s,%.1f,', swapStr, substrate, ...
+                            targetRxn, growthMin);
                     fprintf(fileId, '%.2f,\n', out(m,i,j,k));
                 end
             end
