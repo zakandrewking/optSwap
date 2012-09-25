@@ -27,6 +27,8 @@ function runOptSwapD(opt)
     if ~isfield(opt, 'startWithSwaps'), opt.startWithSwaps = []; end
     if ~isfield(opt, 'experiment'), opt.experiment = 'no name'; end
     if ~isfield(opt, 'notes'), opt.notes = ''; end
+    if ~isfield(opt, 'logFile'), opt.logFile = 'database.csv'; end
+    
     
     % make variables local
     knockoutNum = opt.knockoutNum;
@@ -36,6 +38,7 @@ function runOptSwapD(opt)
     startWithSwaps = opt.startWithSwaps;
     experiment = opt.experiment;
     notes = opt.notes;
+    logFile = opt.logFile;
     
     % check values
     if ~iscell(targetRxns)
@@ -81,7 +84,6 @@ function runOptSwapD(opt)
     % name the run
     run = sprintf('%ddhs-%dKOs-%dswaps', length(dhRxns),...
                   knockoutNum, swapNum);
-    logFile = 'database.csv';
 
     global biomassRxn minBiomass
     [model, biomassRxn] = setupModel('iJO','EX_glc(e)',false,true);
@@ -94,7 +96,6 @@ function runOptSwapD(opt)
     if ~isempty(startWithSwaps)
         model = modelSwap(model, startWithSwaps, false);
     end
-    
     
     global fileId
     fileId = fopen(logFile, 'a');

@@ -1,11 +1,51 @@
-function runOptSwapDed(knockoutNum, swapNum)
+function runOptSwapDed(opt)
 % runs OptSwapD
 % by Zachary King, 8/13/2012
 
-    disp('running optSwapDed')
+
+
+    disp('running optSwapD')
     ticID = tic;
 
-
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % set default parameters
+    if ~exist('opt','var')
+        opt = struct();
+    end
+    if ~isfield(opt,'knockoutNum'), opt.knockoutNum = 0; end
+    if ~isfield(opt, 'swapNum'), opt.swapNum = 0; end
+    if ~isfield(opt, 'targetRxns')
+        opt.targetRxns = {
+            'EX_etoh(e)',
+            'EX_for(e)',
+            'EX_succ(e)',
+            'EX_ac(e)',
+                     };
+    end
+    if ~isfield(opt, 'startWithKnocks'), opt.startWithKnocks = []; end
+    if ~isfield(opt, 'startWithSwaps'), opt.startWithSwaps = []; end
+    if ~isfield(opt, 'experiment'), opt.experiment = 'no name'; end
+    if ~isfield(opt, 'notes'), opt.notes = ''; end
+    if ~isfield(opt, 'logFile'), opt.logFile = 'database.csv'; end
+    
+    % make variables local
+    knockoutNum = opt.knockoutNum;
+    swapNum = opt.swapNum;
+    targetRxns = opt.targetRxns;
+    startWithKnocks = opt.startWithKnocks;
+    startWithSwaps = opt.startWithSwaps;
+    experiment = opt.experiment;
+    notes = opt.notes;
+    logFile = opt.logFile;
+    
+    % check values
+    if ~iscell(targetRxns)
+        targetRxns = {targetRxns};
+    end
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    
     dhRxns = {
         '3OAR100'
         '3OAR40'
@@ -41,115 +81,82 @@ function runOptSwapDed(knockoutNum, swapNum)
              };
 
     % name the run
-    run = sprintf('optSwapDed-%ddhs-%dKOs-%dswaps', length(dhRxns), knockoutNum, swapNum);
-    logFile = sprintf('%s-%s.csv', run, datestr(now, 'yy-mm-dd_HH_MM_SS'));
+    run = sprintf('%ddhs-%dKOs-%dswaps', length(dhRxns),...
+                  knockoutNum, swapNum);
 
-    % load the model
-    model = loadModelNamed('iJO');
-
-    global biomassRxn
-    biomassRxn = model.rxns(model.c~=0);
+    global biomassRxn minBiomass
+    [model, biomassRxn] = setupModel('iJO','EX_glc(e)',false,true);
+    minBiomass = 0.1;
+    
+    % edit model with starting swaps/knocks
+    if ~isempty(startWithKnocks)
+        model = changeRxnBounds(model, startWithKnocks, 0, 'b');
+    end
+    if ~isempty(startWithSwaps)
+        model = modelSwap(model, startWithSwaps, false);
+    end
+    
+    
     global fileId
     fileId = fopen(logFile, 'a');
 
-    myPrint('%s\n', run);
-
-
-    % set parameters
-    targetRxns = {'EX_lac-D(e)'
-                  'EX_glyc(e)'
-                  'EX_pyr(e)'
-                  'EX_fum(e)'
-                  'EX_akg(e)'
-                 };
-    myPrint('dhRxns,', []); printReactions(dhRxns);
-    myPrint('\n', []);
-
-
-
-    isAerobic = false;
-    substrate = 'EX_glc(e)';
-    transhydrogenaseKnockout = true;
-    % knockoutNum = 0;
-    % swapNum = 4;
-    minBiomass = 0.1;
-
-    % prepare the model
-    if transhydrogenaseKnockout
-        % knock out th's
-        thRxns = {'NADTRHD', 'THD2pp'};
-        model = changeRxnBounds(model, thRxns, 0, 'b');
-    end
-    model = changeRxnBounds(model, 'EX_glc(e)', 0, 'l');
-    model = changeRxnBounds(model, substrate, -20, 'l');
-    if isAerobic
-        model = changeRxnBounds(model, 'EX_o2(e)', -20, 'l');
-    else
-        model = changeRxnBounds(model, 'EX_o2(e)', 0, 'l');
-        % BAD REACTIONS, DOWN BOY
-        model = changeRxnBounds(model, {'CAT';'SPODM';'SPODMpp'}, [0;0;0], 'b');
-        % ask Ali about these.
-        % can make oxygen...turn off for anaerobic simulations
-    end
-    model = changeRxnBounds(model, biomassRxn, minBiomass, 'l');
-
-    % save wildtype reaction--with transhydrogenase knockout
-    modelWT = model;
-
-    % Swap reactions, keeping wild type dehydrogenases
-    [model, newNames] = modelSwap(model, dhRxns, true);
-
+    
+    
     % Choose reactions for knocking
-    ssExcludeList = {'Cell Envelope Biosynthesis',
-                     'Exchange',
-                     'Inorganic Ion Transport and Metabolism',
-                     'Lipopolysaccharide Biosynthesis / Recycling',
-                     'Murein Biosynthesis',
-                     'Murein Recycling',
-                     'Transport, Inner Membrane',
-                     'Transport, Outer Membrane',
-                     'Transport, Outer Membrane Porin',
+    ssExcludeList = {'Cell Envelope Biosynthesis',...
+                     'Exchange',...
+                     'Inorganic Ion Transport and Metabolism',...
+                     'Lipopolysaccharide Biosynthesis / Recycling',...
+                     'Murein Biosynthesis',...
+                     'Murein Recycling',...
+                     'Transport, Inner Membrane',...
+                     'Transport, Outer Membrane',...
+                     'Transport, Outer Membrane Porin',...
                      'tRNA Charging'
                     };
     nCarbonThr = 10;
-    [selectedRxns,sets,trimmedSets,geneList,single_KO_GRs,~] = ...
-        getOptknockTargets(model,ssExcludeList,nCarbonThr,false);
-    % TODO: decide whether to use this REDUCED model
-    % TODO: compare essentiality check in getOptknockTargets to RobustKnock/createRobustOneWayFluxesModel
-
+    
+    % load or make reduced model
+    reducedModelFilename = sprintf('reducedModel-%s-%s.mat', 'iJO', 'glc');
+    % need a new reduced model if we start with knocks or swaps
+    noStartProc = isempty(startWithKnocks) && isempty(startWithSwaps);
+    if exist(reducedModelFilename,'file') == 2 && noStartProc 
+        load(reducedModelFilename);
+    else
+        [selectedRxns,~,~,~,~,reducedModel] = ...
+            getOptknockTargets(model,ssExcludeList,nCarbonThr,true);
+        if noStartProc
+            save(reducedModelFilename,'selectedRxns','reducedModel');
+        end
+    end
+    
+    % remove dhRxns from set if they are not in reduced model
+    dhRxns(~ismember(dhRxns, reducedModel.rxns)) = [];
+    
     % set options
     options.useCobraSolver = 0;
     options.knockType = 2; % optSwapD
     options.knockoutNum = knockoutNum;
-    options.knockableRxns = selectedRxns;
-    options.notKnockableRxns = [dhRxns; newNames];
+    % options.knockableRxns = {};
+    notSelectedRxns = model.rxns(~ismember(model.rxns,selectedRxns));
+    options.notKnockableRxns = notSelectedRxns;
     options.swapNum = swapNum;
     options.dhRxns = dhRxns;
 
-    myPrint(['target,yield at min biomass,,yield at max biomass,,' ...
-             'kos,swaps\n'], []);
-    myPrint(',th knockout,optSwap,th knockout,optSwap\n', []);
-
     for i = 1:length(targetRxns)
+        lTic = tic;
         targetRxn = targetRxns{i};
 
-        isSpecial = 1;
-        % deal with special cases
-        if strcmp(targetRxn, 'EX_h2(e)') % turn on FHL for hydrogen production
-            model = changeRxnBounds(model, 'FHL', 1000, 'u');
-        elseif strcmp(targetRxn, 'EX_ala-L(e)')  % exporting valine does not matter
-            model = changeRxnBounds(model, 'EX_val-L(e)', 0, 'u');
-        else
-            isSpecial = 0;
-        end
-
-        myPrint('%s,', targetRxn);
-
-        disp(sprintf('OptSwapD with target reaction %s', targetRxn));
+        modelTR = reducedModel; 
+        modelTR = setupModelForTarget(modelTR, targetRxn);
+        
+        fprintf('OptSwap with target reaction %s\n', targetRxn);
         options.targetRxn = targetRxn;
-        results = optSwapD(model, options);
+        results = optSwapD(modelTR, options);
 
         knockouts = results.knockoutRxns;
+        
+        modelWT = setupModelForTarget(model, targetRxn);
         modelT = modelWT;
         if ~isempty(knockouts)
             modelT = changeRxnBounds(modelT, knockouts, 0, 'b');
@@ -158,11 +165,27 @@ function runOptSwapDed(knockoutNum, swapNum)
             modelT = modelSwap(modelT, results.knockoutDhs, false);
         end
 
+        t = toc(lTic);
+
+        % Project	Date	Time	Name	Script	Knockout num	Swap num	
+        % Target reaction	Yield at min biomass / TH KO	Yield at min biomass
+        %  / OptSwap	Yield at max biomass  / TH KO	Yield at max biomass / 
+        % OptSwap,Knockouts,Swaps,Time (min),Min biomass,Dehydrogenase reactions
+        myPrint('OptSwap,', []);
+        myPrint('%s,', experiment);
+        myPrint('%s,', datestr(now, 'mm/dd/yyyy'));
+        myPrint('%s,', datestr(now, 'HH:MM:SS'));
+        myPrint('%s,', run);
+        myPrint('optSwapD.m,', []);
+        myPrint('%d,', options.knockoutNum);
+        myPrint('%d,', options.swapNum);
+        myPrint('%s,', targetRxn);
         printMaxYield(modelWT,targetRxn);
         printMaxYield(modelT, targetRxn);
-        printCoupledYield(modelWT, targetRxn);
-        printCoupledYield(modelT, targetRxn);
-
+        solnWT = printCoupledYield(modelWT, targetRxn);
+        solnT = printCoupledYield(modelT, targetRxn);
+        printSsp(modelWT, targetRxn, solnWT);
+        printSsp(modelT, targetRxn, solnT);
         if ~isempty(knockouts)
             printReactions(knockouts);
         else
@@ -175,34 +198,63 @@ function runOptSwapDed(knockoutNum, swapNum)
             display('no swaps');
             myPrint(',', []);
         end
+        myPrint('%.1f,', t/60);
+        myPrint('%.1f,',minBiomass);
+        printReactions(dhRxns); 
+        myPrint('%s,', notes); %notes
+        myPrint('%d,', results.exitFlag);
+        myPrint('%d,', results.inform);
         myPrint('\n', []);
 
     end
-    t = toc(ticID);
-    myPrint('time (min),%.1f', t/60);
+    % t = toc(ticID);
+    % myPrint('time (min),%.1f', t/60);
     fclose(fileId);
 end
 
 
 function printMaxYield(model, targetRxn)
+    global biomassRxn minBiomass
+    model = changeRxnBounds(model, biomassRxn, minBiomass, 'l'); 
     model.c = zeros(size(model.c));
     model.c(ismember(model.rxns, targetRxn)) = 1;
     soln = optimizeCbModel(model);
     myPrint('%.4f,', soln.f);
 end
 
-function printCoupledYield(model, targetRxn)
+function soln = printCoupledYield(model, targetRxn)
     global biomassRxn
     model.c = zeros(size(model.c));
     model.c(ismember(model.rxns, biomassRxn)) = 1;
     soln = optimizeCbModel(model);
-    myPrint('%.4f,', soln.x(ismember(model.rxns, targetRxn)));
+    if ~isempty(soln.x)
+        myPrint('%.4f,', soln.x(ismember(model.rxns, targetRxn)));
+    else
+        myPrint('no sol,', []);
+    end
+end
+
+function printSsp(model, targetRxn, prevSoln)
+    if nargin < 3
+        global biomassRxn
+        model.c = zeros(size(model.c));
+        model.c(ismember(model.rxns, biomassRxn)) = 1;
+        soln = optimizeCbModel(model);
+    else
+        soln = prevSoln;
+    end
+    if ~isempty(soln.x)
+        myPrint('%.4f,', soln.x(ismember(model.rxns, targetRxn))*soln.f);
+    else
+        myPrint('no sol,', []);
+    end
 end
 
 function printReactions(reactions)
     for j=1:length(reactions)
         myPrint('''%s'';', reactions{j});
     end
+    myPrint(',', []);
 end
 
 function myPrint(string, val)
@@ -210,51 +262,3 @@ function myPrint(string, val)
     display(sprintf(string, val));
     fprintf(fileId, string, val);
 end
-
-% modelT = model;
-% modelT.c = zeros(size(model.c));
-% modelT.c(ismember(modelT.rxns, targetRxns{i})) = 1;
-% modelT.lb(ismember(modelT.rxns, biomassRxn)) = 0.01;
-% sol = optimizeCbModel(modelT);
-% maxProd{i} = sol.f
-
-% logFile = ['log-' run '.txt'];
-% fileId = fopen(logFile, 'a');
-% fprintf(fileId, '%s: %g\n', targetRxns{i}, sol.f);
-% fclose(fileId);
-
-
-% % write data file;
-% save(sprintf('%s_%d_%s',run, i, datestr(now, 'yy-mm-dd_HH_MM_SS')));
-% % write to log file
-% t = toc(ticID);
-% logFile = ['log-' run '.txt'];
-% fileId = fopen(logFile,'a');
-% fprintf(fileId,'%s: %s finished in %g min\n',...
-%                 datestr(now,'yy-mm-dd_HH_MM_SS'), run, t/60);
-
-% knockoutString = '';
-% for j=1:length(results.knockoutRxns)
-%     knockoutString = [knockoutString ' ' results.knockoutRxns{j}];
-% end
-% display(['knockouts: ', knockoutString]);
-% fprintf(fileId,'knocked rxns: %s\n', knockoutString);
-
-
-% newModel = changeRxnBounds(model, results.knockoutRxns, 0, 'b');
-% compareOptions.substrateRxn = 'EX_glc(e)';
-% compareOptions.targetRxn = options.targetRxn;
-% compareOptions.isAerobic = isAerobic;
-% compareOptions.pairwiseCompare = true;
-% compareOptions.showEnvelope = true;
-% output = compareModels({newModel, model}, compareOptions)
-% % TODO: print to file
-% % fprintf(fileId,'%s\n',output);
-
-% fclose(fileId);
-
-
-
-% try
-%     tw.updateStatus(sprintf('@zakandrewking %s finished', run));
-% end

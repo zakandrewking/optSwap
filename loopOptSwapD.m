@@ -2,34 +2,28 @@ function loopOptSwapD
 
     % setup Cleaner
     % cleaner = onCleanup(@() cleanup);
-    % global run status
-    % status = 'starting';
-    % run = '';
+    global run status
+    status = 'starting';
+    run = 'glyclate production';
     
     sets = [
-        10,0;
+        3,0;
         5,0;
-        3,1;
-        3,2;
-        3,3;
-        3,4;
-        3,5;
-        3,10;
-        3,20;
-        5,1;
-        5,2;
-        5,3;
-        5,4;
-        5,5;
-        5,10;
-        5,20;];
-
+           ];
+%     startSwaps = {
+% {'G6PDH2r';'GLUDy';'MTHFD';}
+% {'3OAR60';'3OAR80';'AKGDH';'GLUDy';}
+%         };
+        
     for i=1:size(sets,1)
-        % for j=1:length(swaps)
-        opt.kos = sets(i,1);
-        opt.swaps = sets(i,2);
+        status = sprintf('run: %d, kos: %d swaps: %d', i, sets(i,1), sets(i,2)); 
+        opt.knockoutNum = sets(i,1);
+        opt.swapNum = sets(i,2);
+        opt.targetRxns = {'EX_glyclt(e)'};
+        opt.experiment = run;
+        opt.logFile = 'database.csv';
+        % opt.startWithSwaps = startSwaps{i};
         runOptSwapD(opt);
-        % end
     end
-
+    status = 'finished';
 end
