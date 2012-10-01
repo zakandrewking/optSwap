@@ -99,7 +99,7 @@ function runOptSwapD(opt)
     
     global fileId
     fileId = fopen(logFile, 'a');
-
+    
     
     
     % Choose reactions for knocking
@@ -201,7 +201,11 @@ function runOptSwapD(opt)
         myPrint('%.1f,', t/60);
         myPrint('%.1f,',minBiomass);
         printReactions(dhRxns); 
-        myPrint('%s,', notes); %notes
+        if ~isempty(startWithSwaps) || ~isempty(startWithKnocks)
+            printReactions([startWithSwaps;startWithKnocks]);
+        else
+            myPrint(',', []);
+        end
         myPrint('%d,', results.exitFlag);
         myPrint('%d,', results.inform);
         myPrint('\n', []);

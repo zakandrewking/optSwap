@@ -52,7 +52,7 @@ function productionEnvelopeForSwaps(targetRxns,swaps,kos)
     % setup model
     keepWtDh = false;
     global biomassRxn
-    [model, biomassRxn] = setupModel('iJO','EX_glc(e)',false,true);
+    [model, biomassRxn] = setupModel('iJO','EX_glc(e)','anaerobic','THKO');
 
     figure()
     hold on
