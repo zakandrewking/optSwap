@@ -8,7 +8,7 @@ function maxYield
     cleaner = onCleanup(@() cleanup);
     global run status
     status = 'starting';
-    run = 'max-yield_all-forward-transporters';
+    run = 'max-yield_all-forward-transporters_POR5-irrev';
     
     logFile = sprintf('%s-%s.csv', run, datestr(now, 'yy-mm-dd_HH_MM_SS'));
     fileId = fopen(logFile, 'a');
@@ -16,7 +16,7 @@ function maxYield
 
     % load model
     model = loadModelNamed('iJO');
-    [model, biomassRxn] = setupModel('iJO','EX_glc(e)', 'anaerobic', 'noTHKO');
+    [model, biomassRxn] = setupModel('iJO','EX_glc(e)', 'anaerobic', 'noTHKO','POR5_irrev');
     
     % get all exchange reactions
     targetRxns = model.rxns(findExcRxns(model));
@@ -31,6 +31,9 @@ function maxYield
     isAerobic = false;
     substrateList = {'EX_glc(e)', 'EX_xyl-D(e)'};
 
+    % testing
+    % targetRxns = {'EX_for(e)'};
+    
     % go!
     out = zeros(3, length(substrateList), length(targetRxns), length(growthMins));
     fprintf(fileId, 'swap,substrate,target,growth min,max yield\n'); 
@@ -75,7 +78,12 @@ function maxYield
                     out(m,i,j,k) = sol.f; 
                     fprintf(fileId, '%s,%s,%s,%.1f,', swapStr, substrate, ...
                             targetRxn, growthMin);
-                    fprintf(fileId, '%.2f,\n', out(m,i,j,k));
+                    fprintf(fileId, '%.2f,\n', sol.f);
+                    % check FUM flux
+                    % if ~isempty(sol.x)
+                    %     fprintf('Fum flux: %.2f\n', ...
+                    %             sol.x(ismember(model.rxns,'FUMt2_2pp')));
+                    % end
                 end
             end
         end
