@@ -1,7 +1,7 @@
 function cleanup()
    global run status 
    tw = setupTwitty;
-   if tw
+   if ~isempty(tw)
        string = sprintf('@zakandrewking %s: %s', run, status);
        disp(string);
        string = string(1:min(140,length(string)));
