@@ -7,7 +7,7 @@ function runOptSwapD(opt)
     disp('running optSwapD')
     ticID = tic;
 
-    
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % set default parameters
     if ~exist('opt','var')
@@ -21,15 +21,16 @@ function runOptSwapD(opt)
             'EX_for(e)',
             'EX_succ(e)',
             'EX_ac(e)',
-                     };
+                         };
     end
     if ~isfield(opt, 'startWithKnocks'), opt.startWithKnocks = []; end
     if ~isfield(opt, 'startWithSwaps'), opt.startWithSwaps = []; end
     if ~isfield(opt, 'experiment'), opt.experiment = 'no name'; end
     if ~isfield(opt, 'notes'), opt.notes = ''; end
     if ~isfield(opt, 'logFile'), opt.logFile = 'database.csv'; end
-    
-    
+    if ~isfield(opt, 'swapAllDhs'), opt.swapAllDhs = false; end
+    if ~isfield(opt, 'rxnSet'), opt.rxnSet = {}; end
+
     % make variables local
     knockoutNum = opt.knockoutNum;
     swapNum = opt.swapNum;
@@ -39,56 +40,26 @@ function runOptSwapD(opt)
     experiment = opt.experiment;
     notes = opt.notes;
     logFile = opt.logFile;
-    
+    swapAllDhs = opt.swapAllDhs;
+    rxnSet = opt.rxnSet;
+
     % check values
     if ~iscell(targetRxns)
         targetRxns = {targetRxns};
     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-    
-    dhRxns = {
-        '3OAR100'
-        '3OAR40'
-        '3OAR60'
-        '3OAR80'
-        'AGPR'
-        'AKGDH'
-        'ASAD'
-        'DHDPRy'
-        'EAR40x'
-        'EAR60x'
-        'EAR80x'
-        'G6PDH2r'
-        'GAPD'
-        'GLUDy'
-        'GND'
-        'HPYRRx'
-        'HSDy'
-        'ICDHyr'
-        'IPMD'
-        'KARA1'
-        'KARA2'
-        'MDH'
-        'MTHFD'
-        'NADH16pp'
-        'PDH'
-        'PGCD'
-        'SHK3Dr'
-        'TRSARr'
-        'ME1'
-        'LDH_D'
-        'LCARR'
-             };
+
+
+    dhRxns = dhRxnList(31);
 
     % name the run
     run = sprintf('%ddhs-%dKOs-%dswaps', length(dhRxns),...
                   knockoutNum, swapNum);
 
     global biomassRxn minBiomass
-    [model, biomassRxn] = setupModel('iJO','EX_glc(e)',false,true);
+    [model, biomassRxn] = setupModel('iJO','EX_glc(e)','anaerobic','thko');
     minBiomass = 0.1;
-    
+
     % edit model with starting swaps/knocks
     if ~isempty(startWithKnocks)
         model = changeRxnBounds(model, startWithKnocks, 0, 'b');
@@ -96,12 +67,14 @@ function runOptSwapD(opt)
     if ~isempty(startWithSwaps)
         model = modelSwap(model, startWithSwaps, false);
     end
-    
+    if swapAllDhs
+        model = modelSwap(model, dhRxns, true);
+    end
+
     global fileId
     fileId = fopen(logFile, 'a');
-    
-    
-    
+    fprintf(fileId,'\n');
+
     % Choose reactions for knocking
     ssExcludeList = {'Cell Envelope Biosynthesis',...
                      'Exchange',...
@@ -115,30 +88,42 @@ function runOptSwapD(opt)
                      'tRNA Charging'
                     };
     nCarbonThr = 10;
-    
+
     % load or make reduced model
-    reducedModelFilename = sprintf('reducedModel-%s-%s.mat', 'iJO', 'glc');
+    if isempty(rxnSet)
+        reducedModelFilename = sprintf('reducedModel-%s-%s.mat', 'iJO', ...
+                                       'glc');
+    else
+        reducedModelFilename = sprintf('reducedModel-%s-%s-%d.mat', 'iJO', ...
+                                       'glc', length(rxnSet));
+    end
     % need a new reduced model if we start with knocks or swaps
     noStartProc = isempty(startWithKnocks) && isempty(startWithSwaps);
-    if exist(reducedModelFilename,'file') == 2 && noStartProc 
+    if exist(reducedModelFilename,'file') == 2 && noStartProc
         load(reducedModelFilename);
     else
-        [selectedRxns,~,~,~,~,reducedModel] = ...
-            getOptknockTargets(model,ssExcludeList,nCarbonThr,true);
+        if isempty(rxnSet)
+            [selectedRxns,~,~,~,~,reducedModel] = ...
+                getOptknockTargets(model,ssExcludeList,nCarbonThr,true);
+        else
+            selectedRxns = rxnSet;
+            reducedModel = reduceModel(model);
+        end
         if noStartProc
             save(reducedModelFilename,'selectedRxns','reducedModel');
         end
     end
-    
+    fprintf('\nNumber of selected reactions: %d\n', length(selectedRxns))
+
     % remove dhRxns from set if they are not in reduced model
     dhRxns(~ismember(dhRxns, reducedModel.rxns)) = [];
-    
+
     % set options
     options.useCobraSolver = 0;
     options.knockType = 2; % optSwapD
     options.knockoutNum = knockoutNum;
     % options.knockableRxns = {};
-    notSelectedRxns = model.rxns(~ismember(model.rxns,selectedRxns));
+    notSelectedRxns = reducedModel.rxns(~ismember(reducedModel.rxns,selectedRxns));
     options.notKnockableRxns = notSelectedRxns;
     options.swapNum = swapNum;
     options.dhRxns = dhRxns;
@@ -147,15 +132,15 @@ function runOptSwapD(opt)
         lTic = tic;
         targetRxn = targetRxns{i};
 
-        modelTR = reducedModel; 
+        modelTR = reducedModel;
         modelTR = setupModelForTarget(modelTR, targetRxn);
-        
+
         fprintf('OptSwap with target reaction %s\n', targetRxn);
         options.targetRxn = targetRxn;
         results = optSwapD(modelTR, options);
 
         knockouts = results.knockoutRxns;
-        
+
         modelWT = setupModelForTarget(model, targetRxn);
         modelT = modelWT;
         if ~isempty(knockouts)
@@ -167,9 +152,9 @@ function runOptSwapD(opt)
 
         t = toc(lTic);
 
-        % Project	Date	Time	Name	Script	Knockout num	Swap num	
-        % Target reaction	Yield at min biomass / TH KO	Yield at min biomass
-        %  / OptSwap	Yield at max biomass  / TH KO	Yield at max biomass / 
+        % Project   Date    Time    Name    Script  Knockout num    Swap num
+        % Target reaction   Yield at min biomass / TH KO    Yield at min biomass
+        %  / OptSwap    Yield at max biomass  / TH KO   Yield at max biomass /
         % OptSwap,Knockouts,Swaps,Time (min),Min biomass,Dehydrogenase reactions
         myPrint('OptSwap,', []);
         myPrint('%s,', experiment);
@@ -200,7 +185,7 @@ function runOptSwapD(opt)
         end
         myPrint('%.1f,', t/60);
         myPrint('%.1f,',minBiomass);
-        printReactions(dhRxns); 
+        printReactions(dhRxns);
         if ~isempty(startWithSwaps) || ~isempty(startWithKnocks)
             printReactions([startWithSwaps;startWithKnocks]);
         else
@@ -208,8 +193,6 @@ function runOptSwapD(opt)
         end
         myPrint('%d,', results.exitFlag);
         myPrint('%d,', results.inform);
-        myPrint('\n', []);
-
     end
     % t = toc(ticID);
     % myPrint('time (min),%.1f', t/60);
@@ -219,7 +202,7 @@ end
 
 function printMaxYield(model, targetRxn)
     global biomassRxn minBiomass
-    model = changeRxnBounds(model, biomassRxn, minBiomass, 'l'); 
+    model = changeRxnBounds(model, biomassRxn, minBiomass, 'l');
     model.c = zeros(size(model.c));
     model.c(ismember(model.rxns, targetRxn)) = 1;
     soln = optimizeCbModel(model);
