@@ -737,7 +737,7 @@ function results = setupAndRunMILP(useCobraSolver,...
 
         Result_tomRun = tomRun('cplex', Prob_OptKnock2, 2);
 
-        % save('raw results','Result_tomRun');
+        save('raw results','Result_tomRun');
 
         results.raw = Result_tomRun;
         results.C = C;
@@ -770,6 +770,7 @@ function results = setupAndRunMILP(useCobraSolver,...
         results.organismObjectiveInd = model.organismObjectiveInd;
         results.chemicalInd = model.chemicalInd;
         results.chemical = -Result_tomRun.f_k;
+        results.f_k = Result_tomRun.f_k;
         results.knockoutRxns = model.rxns(yInd(results.y==0));
         results.knockoutDhs = model.rxns(qInd(results.q==0));
         results.knockoutSwaps = model.rxns(sInd(results.s==0));

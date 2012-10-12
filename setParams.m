@@ -5,7 +5,8 @@ function [newProb,solverParams] = setParams(prob, cobraSolverFlag)
 
     intTol = 10e-9;
     relMipGapTol = 1e-6; 
-    timeLimit = 3600*3; %seconds
+    timeLimit = 3600*24
+    ; %seconds
     logFile = 'log.txt'; 
     printLevel = 10;
     feasTol = 1e-8; 
