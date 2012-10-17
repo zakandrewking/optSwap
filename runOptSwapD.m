@@ -4,7 +4,7 @@ function runOptSwapD(opt)
 
 
 
-    disp('running optSwapD')
+    disp('running optSwap')
     ticID = tic;
 
 
@@ -30,7 +30,8 @@ function runOptSwapD(opt)
     if ~isfield(opt, 'logFile'), opt.logFile = 'database.csv'; end
     if ~isfield(opt, 'swapAllDhs'), opt.swapAllDhs = false; end
     if ~isfield(opt, 'rxnSet'), opt.rxnSet = {}; end
-
+    if ~isfield(opt, 'aerobicString'), opt.aerobicString = 'anaerobic'; end
+    
     % make variables local
     knockoutNum = opt.knockoutNum;
     swapNum = opt.swapNum;
@@ -42,6 +43,7 @@ function runOptSwapD(opt)
     logFile = opt.logFile;
     swapAllDhs = opt.swapAllDhs;
     rxnSet = opt.rxnSet;
+    aerobicString = opt.aerobicString;
 
     % check values
     if ~iscell(targetRxns)
@@ -57,9 +59,9 @@ function runOptSwapD(opt)
                   knockoutNum, swapNum);
 
     global biomassRxn minBiomass
-    [model, biomassRxn] = setupModel('iJO','EX_glc(e)','anaerobic','thko');
     minBiomass = 0.1;
-
+    [model, biomassRxn] = setupModel('iJO','EX_glc(e)',aerobicString,'thko');
+  
     % edit model with starting swaps/knocks
     if ~isempty(startWithKnocks)
         model = changeRxnBounds(model, startWithKnocks, 0, 'b');
@@ -119,7 +121,7 @@ function runOptSwapD(opt)
 
     % set options
     options.useCobraSolver = 0;
-    options.knockType = 2; % optSwapD
+    options.knockType = 2; % optSwap
     options.knockoutNum = knockoutNum;
     % options.knockableRxns = {};
     notSelectedRxns = reducedModel.rxns(~ismember(reducedModel.rxns,selectedRxns));
@@ -137,7 +139,7 @@ function runOptSwapD(opt)
 
         fprintf('OptSwap with target reaction %s\n', targetRxn);
         options.targetRxn = targetRxn;
-        results = optSwapD(modelTR, options);
+        results = optSwap(modelTR, options);
 
         knockouts = results.knockoutRxns;
 
@@ -161,7 +163,7 @@ function runOptSwapD(opt)
         myPrint('%s,', datestr(now, 'mm/dd/yyyy'));
         myPrint('%s,', datestr(now, 'HH:MM:SS'));
         myPrint('%s,', run);
-        myPrint('optSwapD.m,', []);
+        myPrint('optSwap.m,', []);
         myPrint('%d,', options.knockoutNum);
         myPrint('%d,', options.swapNum);
         myPrint('%s,', targetRxn);

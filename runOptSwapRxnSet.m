@@ -2,7 +2,7 @@ function runOptSwapRxnSet(opt, reactionSet)
 % runs OptSwapD with a small reaction set
 % by Zachary King, 8/13/2012
 
-    disp('running optSwapD')
+    disp('running optSwap')
     ticID = tic;
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -100,7 +100,7 @@ function runOptSwapRxnSet(opt, reactionSet)
 
         fprintf('RobustKnock with target reaction %s\n', targetRxn);
         options.targetRxn = targetRxn;
-        results = optSwapD(modelTR, options);
+        results = optSwap(modelTR, options);
 
         knockouts = results.knockoutRxns;
 
@@ -124,7 +124,7 @@ function runOptSwapRxnSet(opt, reactionSet)
         myPrint('%s,', datestr(now, 'mm/dd/yyyy'));
         myPrint('%s,', datestr(now, 'HH:MM:SS'));
         myPrint('%s,', run);
-        myPrint('optSwapD.m,', []);
+        myPrint('optSwap.m,', []);
         myPrint('%d,', options.knockoutNum);
         myPrint(',', []);  % myPrint('%d,', options.swapNum);
         myPrint('%s,', targetRxn);

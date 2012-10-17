@@ -1,14 +1,13 @@
-function loopOptSwapD
+function loopOptSwap1
 
     % setup Cleaner
     cleaner = onCleanup(@() cleanup);
     global run status
     status = 'starting';
-    run = 'Knocks with open DHs; 24hrs';
+    run = '';
 
     sets = [
-        3,0;
-        5,0;
+        3,3;
            ];
     %     startSwaps = {
     % {'G6PDH2r';'LCARR';'TRSARr';}
@@ -33,7 +32,7 @@ function loopOptSwapD
                          'EX_mal-L(e)';
                          'EX_glu-L(e)';};
         opt.experiment = run;
-        opt.logFile = 'database.csv';
+        opt.logFile = 'database-1.csv';
         % opt.startWithSwaps = startSwaps{i};
         opt.swapAllDhs = true;
         runOptSwapD(opt);

@@ -1,4 +1,4 @@
-function results = optSwapD(model, opt)
+function results = optSwap(model, opt)
 % Adapted from RobustKnock.m
 % By Zachary King 8/13/2012
 %
