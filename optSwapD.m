@@ -591,7 +591,12 @@ function results = optSwapD(model, opt)
         [A2_wRow, A2_wCol]=size(A2_w);
         [ARow, ACol] = size(A);
 
-        
+        sCoupledMatrix = zeros(qSize, qSize);
+        qsCoupling_S = qsCoupling(:,2);
+        for i = 1:qSize
+            thisSIndex = qsCoupling_S(qsCoupling(:,1)==qInd(i));
+            sCoupledMatrix(i,sInd==thisSIndex) = 1;
+        end
         A3 = [
         %dual constraints
             A2_w, sparse(A2_wRow,ACol), Ayqs2_w;   %  19316       23762
@@ -602,8 +607,8 @@ function results = optSwapD(model, opt)
             zeros(1, uSize + zSizeOptKnock2 + vSize + ySize), -ones(1, qSize),...
                        zeros(1, sSize); %  1       23762
         % swap constraints
-            zeros(qSize, uSize + zSizeOptKnock2 + vSize + ySize), eye(qSize), eye(sSize);
-            zeros(qSize, uSize + zSizeOptKnock2 + vSize + ySize), -eye(qSize), -eye(sSize); %  27       23762
+            zeros(qSize, uSize + zSizeOptKnock2 + vSize + ySize), eye(qSize), sCoupledMatrix;
+            zeros(qSize, uSize + zSizeOptKnock2 + vSize + ySize), -eye(qSize), -sCoupledMatrix; %  27       23762
         %feasibility constraint
             sparse(ARow,uSize+zSizeOptKnock2), A, Ayqs   % 10134       23762
            ];

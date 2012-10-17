@@ -2,10 +2,9 @@ function productionEnvelopeForSwaps(targetRxns,swaps,kos)
 % productionEnvelopeForSwaps
 %
 % INPUTS
+% targetRxn
 % swaps
 % kos
-% targetRxn
-% keepWtDh
 %
 % Zachary King 9/12/12
 
@@ -54,6 +53,9 @@ function productionEnvelopeForSwaps(targetRxns,swaps,kos)
     global biomassRxn
     [model, biomassRxn] = setupModel('iJO','EX_glc(e)','anaerobic','THKO');
 
+    color = {'k', 'Blue', 'Red', 'Green'};
+    lineStyle = {'-', '--', '-.', ':'};
+    
     figure()
     hold on
     for i=1:length(targetRxns)
@@ -78,13 +80,18 @@ function productionEnvelopeForSwaps(targetRxns,swaps,kos)
         end
         set(lineHandle,'DisplayName',[koStr '; ' swapStr '--' ...
                             targetRxns{i}]);
+        if i < length(color)
+            set(lineHandle, 'Color', color{i});
+            set(lineHandle, 'LineStyle', lineStyle{i});
+        end
 
         printCoupledYield(modelT, targetRxns{i});
     end
-    legendH = legend;
+    legendH = legend('show');
     set(legendH, 'Interpreter', 'none');
     ylabel('Production (mmol/gDW h)');
     xlabel('Growth rate (1/h)');
+    set(gcf, 'Color', 'White')
     hold off
     % title();
     status = 'finished';
