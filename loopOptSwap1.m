@@ -4,15 +4,9 @@ function loopOptSwap1
     cleaner = onCleanup(@() cleanup);
     global run status
     status = 'starting';
-    run = '';
+    run = '2x2 on 13 products-aerobic glucose';
 
-    sets = [
-        3,3;
-           ];
-    %     startSwaps = {
-    % {'G6PDH2r';'LCARR';'TRSARr';}
-    % {'GLUDy';'LCARR';'ME1';'PDH';}
-    %                  };
+    sets = [2,2];
 
     for i=1:size(sets,1)
         status = sprintf('run: %d, kos: %d swaps: %d', i, sets(i,1), sets(i,2));
@@ -33,8 +27,10 @@ function loopOptSwap1
                          'EX_glu-L(e)';};
         opt.experiment = run;
         opt.logFile = 'database-1.csv';
-        % opt.startWithSwaps = startSwaps{i};
-        opt.swapAllDhs = true;
+        opt.aerobicString = 'aerobic';
+        opt.substrate = 'EX_glc(e)';
+        opt.maxTime = 168*60; %min
+        opt.swapAllDhs = false;
         runOptSwapD(opt);
     end
     status = 'finished';

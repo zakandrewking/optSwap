@@ -1,12 +1,9 @@
-function runOptSwapD(opt)
-% runs OptSwapD
+function runOptSwap(opt)
+% runs OptSwap
 % by Zachary King, 8/13/2012
 
-
-
     disp('running optSwap')
-    ticID = tic;
-
+    ticID = tic; 
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % set default parameters
@@ -31,6 +28,8 @@ function runOptSwapD(opt)
     if ~isfield(opt, 'swapAllDhs'), opt.swapAllDhs = false; end
     if ~isfield(opt, 'rxnSet'), opt.rxnSet = {}; end
     if ~isfield(opt, 'aerobicString'), opt.aerobicString = 'anaerobic'; end
+    if ~isfield(opt, 'maxTime'), opt.maxTime = 60; end
+    if ~isfield(opt, 'substrate'), opt.substrate = 'EX_glc(e)'; end
     
     % make variables local
     knockoutNum = opt.knockoutNum;
@@ -44,6 +43,8 @@ function runOptSwapD(opt)
     swapAllDhs = opt.swapAllDhs;
     rxnSet = opt.rxnSet;
     aerobicString = opt.aerobicString;
+    maxTime = opt.maxTime;
+    substrate = opt.substrate;
 
     % check values
     if ~iscell(targetRxns)
@@ -60,7 +61,7 @@ function runOptSwapD(opt)
 
     global biomassRxn minBiomass
     minBiomass = 0.1;
-    [model, biomassRxn] = setupModel('iJO','EX_glc(e)',aerobicString,'thko');
+    [model, biomassRxn] = setupModel('iJO',substrate,aerobicString,'thko');
   
     % edit model with starting swaps/knocks
     if ~isempty(startWithKnocks)
@@ -93,10 +94,10 @@ function runOptSwapD(opt)
     % load or make reduced model
     if isempty(rxnSet)
         reducedModelFilename = sprintf('reducedModel-%s-%s.mat', 'iJO', ...
-                                       'glc');
+                                       substrate);
     else
         reducedModelFilename = sprintf('reducedModel-%s-%s-%d.mat', 'iJO', ...
-                                       'glc', length(rxnSet));
+                                       substrate, length(rxnSet));
     end
     % need a new reduced model if we start with knocks or swaps
     noStartProc = isempty(startWithKnocks) && isempty(startWithSwaps);
@@ -188,6 +189,8 @@ function runOptSwapD(opt)
         end
         myPrint('%.1f,', t/60);
         myPrint('%.1f,',minBiomass);
+        myPrint('%s,', aerobicString); % Aerobicity	
+        myPrint('%s,', substrate);     % Substrate
         printReactions(dhRxns);
         if ~isempty(startWithSwaps) || ~isempty(startWithKnocks)
             printReactions([startWithSwaps;startWithKnocks]);

@@ -20,6 +20,7 @@ function results = optSwap(model, opt)
 %   % FOR OPTSWAP:
 %   swapNum - number of swaps
 %   dhRxns - dehydrogenase reaction list
+%   maxTime - time limit in minutes
 %
 % OUTPUTS
 % results
@@ -49,6 +50,10 @@ function results = optSwap(model, opt)
     end
     if ~isfield(opt,'swapNum'), opt.swapNum = 0; end
     if ~isfield(opt,'dhRxns'), opt.dhRxns = {}; end
+    if ~isfield(opt, 'maxTime'), opt.maxTime = []; end
+    
+    % set local variables
+    maxTime = opt.maxTime;
     
     printLevel = 10;
     
@@ -222,44 +227,6 @@ function results = optSwap(model, opt)
                                       lbJoined, ubJoined, IntVars_optKnock, ...
                                       model, yInd, [], [], K, [], ...
                                       coupledFlag, coupled);
-            % disp('mipAssign')
-            % Prob_optKnock=mipAssign(-Cjoined, Ajoined, [], Bjoined, lbJoined, ubJoined, [], 'part 2.3 MILP', ...
-            %                         setupFile, nProblem, ...
-            %                         IntVars_optKnock, VarWeight, KNAPSACK, fIP, xIP, ...
-            %                         f_Low, x_min, x_max, f_opt, x_opt);
-            % disp('setParams')
-            % Prob_optKnock=setParams(Prob_optKnock);
-            % disp('tomRun')
-            % Result_optKnock=tomRun('cplex', Prob_optKnock, 1);
-
-            % YsOptKnockNotRound=Result_optKnock.x_k(IntVars_optKnock);
-            % YsOptKnock=round(YsOptKnockNotRound);
-            % knockedYind=find(1.-YsOptKnock);
-            % knockedVoptKnock=yInd(knockedYind);
-
-            % results.Result_optKnock.exitFlag=Result_optKnock.ExitFlag;
-            % results.Result_optKnock.organismObjectiveInd=model.organismObjectiveInd;
-            % results.Result_optKnock.chemicalInd=model.chemicalInd;
-            % results.Result_optKnock.objective=Result_optKnock.x_k(model.organismObjectiveInd);
-            % results.Result_optKnock.chemicel=Result_optKnock.x_k(model.chemicalInd);
-            % results.Result_optKnock.x_k=Result_optKnock.x_k;
-            % results.Result_optKnock.ySize=ySize;
-            % results.Result_optKnock.ySum=sum(YsOptKnockNotRound);
-            % results.Result_optKnock.yBoundry=ySize-K;
-            % results.Result_optKnock.knockedYind=knockedYind;
-            % results.Result_optKnock.knockedYvals=YsOptKnockNotRound(knockedYind);
-            % results.Result_optKnock.knockedV=knockedVoptKnock;
-            % results.Result_optKnock.knockedVvalues=Result_optKnock.x_k(yInd(results.Result_optKnock.knockedYind));
-            % results.Result_optKnock.y=YsOptKnockNotRound;
-
-            % if(Result_optKnock.ExitFlag ==0)        %a sucessful run
-            %     disp('optknock successful run')
-            %     results.Result_optKnock.knockCheck = ...
-            %         knockCheck(model, knockedVoptKnock, coupledFlag, coupled);
-            % end
-
-
-
 
         elseif (opt.knockType == 1)
             disp('robustKnock')
@@ -345,42 +312,7 @@ function results = optSwap(model, opt)
             results = setupAndRunMILP(opt.useCobraSolver, ...
                                       C3, A3, B3, lb3, ub3, intVars,...
                                       model, yInd, [], [], K, [], ...
-                                      coupledFlag, coupled);
-
-            % %solving mip
-            % disp('mipAssign')
-            % Prob_OptKnock2=mipAssign(-C3, A3, [], B3, lb3, ub3, [], 'part 3 MILP', ...
-            %                          setupFile, nProblem, ...
-            %                          intVars, VarWeight, KNAPSACK, fIP, xIP, ...
-            %                          f_Low, x_min, x_max, f_opt, x_opt);
-            % disp('setParams')
-            % Prob_OptKnock2=setParams(Prob_OptKnock2);
-            % disp('tomRun')
-
-            % Result_OptKnock2=tomRun('cplex', Prob_OptKnock2, 2);
-
-            % YsNotRound=Result_OptKnock2.x_k(intVars);
-            % Ys=round(YsNotRound);
-            % knockedYindNotRound=find(1.-YsNotRound);
-            % knockedYindRound=find(1.-Ys);
-            % knockedVindRobustKnock=yInd(knockedYindRound);
-
-            % results.Result_OptKnock2.exitFlag=Result_OptKnock2.ExitFlag;
-            % results.Result_OptKnock2.organismObjectiveInd=model.organismObjectiveInd;
-            % results.Result_OptKnock2.chemicalInd=model.chemicalInd;
-            % results.Result_OptKnock2.chemical=-Result_OptKnock2.f_k;
-            % results.Result_OptKnock2.exitFlag=Result_OptKnock2.ExitFlag;
-            % results.Result_OptKnock2.ySize=ySize;
-            % results.Result_OptKnock2.ySum=sum(Result_OptKnock2.x_k(intVars));
-            % results.Result_OptKnock2.yLowerBoundry=ySize-K;
-            % results.Result_OptKnock2.knockedYindRound=knockedYindRound;
-            % results.Result_OptKnock2.knockedYvalsRound=YsNotRound(knockedYindRound);
-            % results.Result_OptKnock2.y=Ys;
-            % results.Result_OptKnock2.knockedVind=knockedVindRobustKnock;
-
-            % results.Result_OptKnock2.knockCheck = ...
-            %     knockCheck(model, knockedVindRobustKnock, coupledFlag, coupled);
-
+                                      coupledFlag, coupled); 
         end
         
     elseif (opt.knockType == 2) 
@@ -692,7 +624,7 @@ function results = setupAndRunMILP(useCobraSolver,...
         MILPproblem.vartype(intVars) = 'I'; % assume no binary 'B'?
         MILPproblem.csense = [];
 
-        [MILPproblem,solverParams] = setParams(MILPproblem, true);
+        [MILPproblem,solverParams] = setParams(MILPproblem, true, maxTime);
 
         results = solveCobraMILP(MILPproblem,solverParams);
 
@@ -737,7 +669,7 @@ function results = setupAndRunMILP(useCobraSolver,...
                                  f_Low, x_min, x_max, f_opt, x_opt);
 
         disp('setParams')
-        Prob_OptKnock2 = setParams(Prob_OptKnock2);
+        Prob_OptKnock2 = setParams(Prob_OptKnock2, false, maxTime);
         disp('tomRun')
 
         Result_tomRun = tomRun('cplex', Prob_OptKnock2, 2);

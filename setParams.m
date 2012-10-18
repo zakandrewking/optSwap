@@ -1,12 +1,15 @@
-function [newProb,solverParams] = setParams(prob, cobraSolverFlag)
+function [newProb,solverParams] = setParams(prob, cobraSolverFlag, maxTime)
 
 % OPTIONAL
 % cobraSolverFlag - setup for solveCobraMILP
+% maxTime - time limit in minutes (default 24 hours)
 
+    if (nargin < 2 || isempty(cobraSolverFlag)), cobraSolverFlag = false; end
+    if (nargin < 3 || isempty(maxTime)), maxTime = 24*60; end
+    
     intTol = 10e-9;
     relMipGapTol = 1e-6; 
-    timeLimit = 3600*24
-    ; %seconds
+    timeLimit = maxTime * 60; %seconds
     logFile = 'log.txt'; 
     printLevel = 10;
     feasTol = 1e-8; 
