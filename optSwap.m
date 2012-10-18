@@ -21,6 +21,8 @@ function results = optSwap(model, opt)
 %   swapNum - number of swaps
 %   dhRxns - dehydrogenase reaction list
 %   maxTime - time limit in minutes
+%   printIntermediateSolutions
+%   intermediateSolutionsFile
 %
 % OUTPUTS
 % results
@@ -51,9 +53,18 @@ function results = optSwap(model, opt)
     if ~isfield(opt,'swapNum'), opt.swapNum = 0; end
     if ~isfield(opt,'dhRxns'), opt.dhRxns = {}; end
     if ~isfield(opt, 'maxTime'), opt.maxTime = []; end
+    if ~isfield(opt, 'printIntermediateSolutions')
+        opt.printIntermediateSolutions = false;
+    end
+    if ~isfield(opt, 'intermediateSolutionsFile')
+        opt.intermediateSolutionsFile = [];
+    end
+        
     
     % set local variables
     maxTime = opt.maxTime;
+    printIntermediateSolutions = opt.printIntermediateSolutions;
+    intermediateSolutionsFile = opt.intermediateSolutionsFile;
     
     printLevel = 10;
     
@@ -670,8 +681,19 @@ function results = setupAndRunMILP(useCobraSolver,...
 
         disp('setParams')
         Prob_OptKnock2 = setParams(Prob_OptKnock2, false, maxTime);
-        disp('tomRun')
-
+        
+        if printIntermediateSolutions
+            disp('setting up callback')
+            global optSwapCallbackOptions;
+            optSwapCallbackOptions.outputFile = intermediateSolutionsFile; 
+            optSwapCallbackOptions.model = model;
+            optSwapCallbackOptions.yInd = yInd;
+            optSwapCallbackOptions.qInd = qInd;
+            optSwapCallbackOptions.intVars = intVars;
+            Prob_OptKnock2.MIP.callback(14) = 1;
+        end
+        
+        disp('tomRun') 
         Result_tomRun = tomRun('cplex', Prob_OptKnock2, 2);
 
         save('raw results','Result_tomRun');
@@ -704,7 +726,7 @@ function results = setupAndRunMILP(useCobraSolver,...
 
         results.exitFlag = Result_tomRun.ExitFlag;
         results.inform = Result_tomRun.Inform;
-        results.organismObjectiveInd = model.organismObjectiveInd;
+        results.organismObjectiveInd = model.organsmObjectiveInd;
         results.chemicalInd = model.chemicalInd;
         results.chemical = -Result_tomRun.f_k;
         results.f_k = Result_tomRun.f_k;

@@ -30,6 +30,9 @@ function runOptSwap(opt)
     if ~isfield(opt, 'aerobicString'), opt.aerobicString = 'anaerobic'; end
     if ~isfield(opt, 'maxTime'), opt.maxTime = 60; end
     if ~isfield(opt, 'substrate'), opt.substrate = 'EX_glc(e)'; end
+    if ~isfield(opt, 'printIntermediateSolutions')
+        opt.printIntermediateSolutions = false; 
+    end
     
     % make variables local
     knockoutNum = opt.knockoutNum;
@@ -45,6 +48,7 @@ function runOptSwap(opt)
     aerobicString = opt.aerobicString;
     maxTime = opt.maxTime;
     substrate = opt.substrate;
+    printIntermediateSolutions = opt.printIntermediateSolutions;
 
     % check values
     if ~iscell(targetRxns)
@@ -129,6 +133,11 @@ function runOptSwap(opt)
     options.notKnockableRxns = notSelectedRxns;
     options.swapNum = swapNum;
     options.dhRxns = dhRxns;
+    options.maxTime = maxTime;
+    options.printIntermediateSolutions = printIntermediateSolutions;
+    if printIntermediateSolutions
+        options.intermediateSolutionsFile = [experiment '-MILPsols.csv'];
+    end
 
     for i = 1:length(targetRxns)
         myPrint('\n',[]);
