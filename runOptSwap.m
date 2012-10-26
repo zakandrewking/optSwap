@@ -33,6 +33,7 @@ function runOptSwap(opt)
     if ~isfield(opt, 'printIntermediateSolutions')
         opt.printIntermediateSolutions = false; 
     end
+    if ~isfield(opt, 'useCobraSolver'), opt.useCobraSolver = false; end
     
     % make variables local
     knockoutNum = opt.knockoutNum;
@@ -49,6 +50,7 @@ function runOptSwap(opt)
     maxTime = opt.maxTime;
     substrate = opt.substrate;
     printIntermediateSolutions = opt.printIntermediateSolutions;
+    useCobraSolver = opt.useCobraSolver;
 
     % check values
     if ~iscell(targetRxns)
@@ -58,6 +60,7 @@ function runOptSwap(opt)
 
 
     dhRxns = dhRxnList(31);
+    fprintf('%d dehydrogenase reactions\n', length(dhRxns));
 
     % name the run
     run = sprintf('%ddhs-%dKOs-%dswaps', length(dhRxns),...
@@ -97,15 +100,16 @@ function runOptSwap(opt)
 
     % load or make reduced model
     if isempty(rxnSet)
-        reducedModelFilename = sprintf('reducedModel-%s-%s.mat', 'iJO', ...
-                                       substrate);
+        reducedModelFilename = sprintf('reducedModel-%s-%s-%s.mat', 'iJO', ...
+                                       substrate, aerobicString);
     else
-        reducedModelFilename = sprintf('reducedModel-%s-%s-%d.mat', 'iJO', ...
-                                       substrate, length(rxnSet));
+        reducedModelFilename = sprintf('reducedModel-%s-%s-%s-%d.mat', 'iJO', ...
+                                       substrate, aerobicString, length(rxnSet));
     end
     % need a new reduced model if we start with knocks or swaps
     noStartProc = isempty(startWithKnocks) && isempty(startWithSwaps);
     if exist(reducedModelFilename,'file') == 2 && noStartProc
+        disp('loading reduced model') 
         load(reducedModelFilename);
     else
         if isempty(rxnSet)
@@ -116,10 +120,11 @@ function runOptSwap(opt)
             reducedModel = reduceModel(model);
         end
         if noStartProc
+            fprintf('saving reduced model: %s\n', reducedModelFilename);
             save(reducedModelFilename,'selectedRxns','reducedModel');
         end
     end
-    fprintf('\nNumber of selected reactions: %d\n', length(selectedRxns))
+    fprintf('Number of selected reactions: %d\n', length(selectedRxns))
 
     % remove dhRxns from set if they are not in reduced model
     dhRxns(~ismember(dhRxns, reducedModel.rxns)) = [];
@@ -138,6 +143,7 @@ function runOptSwap(opt)
     if printIntermediateSolutions
         options.intermediateSolutionsFile = [experiment '-MILPsols.csv'];
     end
+    options.useCobraSolver = useCobraSolver;
 
     for i = 1:length(targetRxns)
         myPrint('\n',[]);

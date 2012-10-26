@@ -4,24 +4,24 @@ function loopOptSwap2
     cleaner = onCleanup(@() cleanup);
     global run status
     status = 'starting';
-    run = 'swaps and kos, EX_15dap(e)';
+    run = 'TEST gurobi5 def. params--2x2 ethanol';
 
-    targetRxns = 'EX_15dap(e)';
-    sets = [
-            3,3;
-            5,5;
-            ];
-    for i=1:size(sets,1)
-        status = sprintf('run: %d, kos: %d swaps: %d', i, sets(i,1), sets(i,2));
-        opt.knockoutNum = sets(i,1);
-        opt.swapNum = sets(i,2);
-        opt.targetRxns = targetRxns;
-        opt.experiment = run;
-        opt.logFile = 'database-2.csv';
-        % opt.startWithSwaps = startWithSwaps;
-        % opt.startWithKnocks = startWithKnocks;
-        opt.swapAllDhs = false;
-        runOptSwapD(opt);
-    end
+    sets = [2,2];
+    global USE_MIP_FOCUS_1
+    USE_MIP_FOCUS_1 = false;
+
+    status = sprintf('run: %d, kos: %d swaps: %d', i, sets(1), sets(2));
+    opt.knockoutNum = sets(1);
+    opt.swapNum = sets(2);
+    opt.targetRxns = {'EX_etoh(e)'};
+    opt.experiment = run;
+    opt.logFile = 'database-2.csv';
+    opt.aerobicString = 'anaerobic';
+    opt.substrate = 'EX_glc(e)';
+    opt.maxTime = 12*60; %min
+    opt.useCobraSolver = true;
+    opt.notes = 'MIPFocus = 3';
+    runOptSwap(opt);
+
     status = 'finished';
 end

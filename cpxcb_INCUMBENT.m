@@ -49,55 +49,55 @@ function ret = cpxcb_INCUMBENT(x,f,Prob)
 %
 % Any other return value will be interpreted as 0.
 
-global optSwapCallbackOptions
-global solID
+    global optSwapCallbackOptions
+    global solID
 
-file = optSwapCallbackOptions.intermediateSolutionsFile;
-global fileId
-fileId = fopen(intermediateSolutionsFile, 'a');
+    file = optSwapCallbackOptions.intermediateSolutionsFile;
+    global callbackFileId
+    callbackFileId = fopen(intermediateSolutionsFile, 'a');
 
-% Initialize
-if isempty(solID)
-    solID = 0;
-    objective = [];
-    growth = [];
-    koList = {};
-    swapList = {};
-    myPrint('%s\n', intermediateSolutionsFile);
-    myPrint('time/date,f,kos,swaps', []);
-end
+    % Initialize
+    if isempty(solID)
+        solID = 0;
+        objective = [];
+        growth = [];
+        koList = {};
+        swapList = {};
+        myPrint('%s\n', intermediateSolutionsFile);
+        myPrint('time/date,f,kos,swaps', []);
+    end
 
-solID = solID + 1;
+    solID = solID + 1;
 
-% Get the reactions
-model = optSwapCallbackOptions.model;
-yInd = optSwapCallbackOptions.yInd;
-qInd = optSwapCallbackOptions.qInd;
-intVars = optSwapCallbackOptions.intVars;
+    % Get the reactions
+    model = optSwapCallbackOptions.model;
+    yInd = optSwapCallbackOptions.yInd;
+    qInd = optSwapCallbackOptions.qInd;
+    intVars = optSwapCallbackOptions.intVars;
 
-y = x(intVars(1:length(yInd)));
-koRxns = model.rxns(yInd(y==0));
-q = x(intVars(length(yInd)+1:length(yInd)+length(qInd)));
-swapRxns = model.rxns(qInd(q==0));
+    y = x(intVars(1:length(yInd)));
+    koRxns = model.rxns(yInd(y==0));
+    q = x(intVars(length(yInd)+1:length(yInd)+length(qInd)));
+    swapRxns = model.rxns(qInd(q==0));
 
-myPrint('\n', [])
-myPrint('%s,', datestr(now));
-myPrint('%.4f,', f);
-printReactions(koRxns);
-printReactions(swapList);
-ret = 0;
-fclose(fileId);
+    myPrint('\n', [])
+    myPrint('%s,', datestr(now));
+    myPrint('%.4f,', f);
+    printReactions(koRxns);
+    printReactions(swapList);
+    ret = 0;
+    fclose(callbackFileId);
 end
 
 function printReactions(reactions)
-for j=1:length(reactions)
-    myPrint('''%s'';', reactions{j});
-end
-myPrint(',', []);
+    for j=1:length(reactions)
+        myPrint('''%s'';', reactions{j});
+    end
+    myPrint(',', []);
 end
 
 function myPrint(string, val)
-global fileId
-display(sprintf(string, val));
-fprintf(fileId, string, val);
+    global callbackFileId
+    display(sprintf(string, val));
+    fprintf(fileId, string, val);
 end

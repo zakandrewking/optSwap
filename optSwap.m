@@ -61,10 +61,13 @@ function results = optSwap(model, opt)
     end
         
     
-    % set local variables
+    % set global variables
+    global maxTime printIntermediateSolutions
+    global intermediateSolutionsFile useCobraSolver
     maxTime = opt.maxTime;
     printIntermediateSolutions = opt.printIntermediateSolutions;
     intermediateSolutionsFile = opt.intermediateSolutionsFile;
+    useCobraSolver = opt.useCobraSolver;
     
     printLevel = 10;
     
@@ -93,7 +96,7 @@ function results = optSwap(model, opt)
      notYqsInd, notYqsCoupedInd, m, n, coupled] = ...
                 createRobustOneWayFluxesModel(consModel, chemicalInd, coupledFlag, ...
                                       opt.knockableRxns, opt.notKnockableRxns, qsCoupling,...
-                                              opt.useCobraSolver);
+                                              useCobraSolver);
   
     
     % sizes
@@ -233,8 +236,7 @@ function results = optSwap(model, opt)
             disp('optKnock')
 
 
-            results = setupAndRunMILP(opt.useCobraSolver, ...
-                                      Cjoined, Ajoined, Bjoined, ...
+            results = setupAndRunMILP(Cjoined, Ajoined, Bjoined, ...
                                       lbJoined, ubJoined, IntVars_optKnock, ...
                                       model, yInd, [], [], K, [], ...
                                       coupledFlag, coupled);
@@ -320,8 +322,7 @@ function results = optSwap(model, opt)
             ub3=[tmpH; model.ub; ysUpperBound];
             intVars=A2_wCol+ACol+1:A2_wCol+ACol+ySize;
 
-            results = setupAndRunMILP(opt.useCobraSolver, ...
-                                      C3, A3, B3, lb3, ub3, intVars,...
+            results = setupAndRunMILP(C3, A3, B3, lb3, ub3, intVars,...
                                       model, yInd, [], [], K, [], ...
                                       coupledFlag, coupled); 
         end
@@ -586,27 +587,18 @@ function results = optSwap(model, opt)
               ];
         intVars = (A2_wCol + ACol + 1):(A2_wCol + ACol + yqsSize);
        
-        results = setupAndRunMILP(opt.useCobraSolver, ...
-                                  C3, A3, B3, lb3, ub3, intVars, ...
+        results = setupAndRunMILP(C3, A3, B3, lb3, ub3, intVars, ...
                                   model, yInd, qInd, sInd, K, L, ...
                                   coupledFlag, coupled);
-
     end
-
 end
 
-
-% fileName2=sprintf('res_%s.mat', datestr(clock, 'yyyymmddTHHMMSS'));
-% fl = sprintf('%s//%s', pth, fileName2);
-%save (fl);
-
-
-
-function results = setupAndRunMILP(useCobraSolver,...
-                                   C, A, B, lb, ub, intVars,...
+function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
                                    model, yInd, qInd, sInd, K, L, ...
                                    coupledFlag, coupled);
 
+    global maxTime
+    global printIntermediateSolutions intermediateSolutionsFile
     %solve milp
     %parameter for mip assign
     x_min = []; x_max = []; f_Low = -1E7; % f_Low <= f_optimal must hold
@@ -618,10 +610,12 @@ function results = setupAndRunMILP(useCobraSolver,...
     x_opt = []; % The optimal integer solution is not known
     VarWeight = []; % No variable priorities, largest fractional part will be used
     KNAPSACK = 0; % First run without the knapsack heuristic
-
+    
+    ySize = length(yInd); qSize = length(qInd); sSize = length(sInd);
 
     %solving mip
-    disp('mipAssign')
+    disp('set up MILP')
+    global useCobraSolver
     if (useCobraSolver)
         MILPproblem.c = C;
         MILPproblem.osense = -1;
@@ -632,122 +626,81 @@ function results = setupAndRunMILP(useCobraSolver,...
         MILPproblem.lb = lb; MILPproblem.ub = ub;
         MILPproblem.x0 = [];
         MILPproblem.vartype = char(ones(1,length(C)).*double('C'));
-        MILPproblem.vartype(intVars) = 'I'; % assume no binary 'B'?
-        MILPproblem.csense = [];
+        MILPproblem.vartype(intVars) = 'I';
+        MILPproblem.csense = char(ones(1,length(B)).*double('L'));
+        
+        if printIntermediateSolutions
+            disp('setting up callback')
+            warning('not finished')
+        end
+        [MILPproblem,solverParams] = setParams(MILPproblem, true, maxTime); 
+        disp('Run COBRA MILP')
+        Result_cobra = solveCobraMILP(MILPproblem,solverParams);
 
-        [MILPproblem,solverParams] = setParams(MILPproblem, true, maxTime);
-
-        results = solveCobraMILP(MILPproblem,solverParams);
-
-        % TODO: finish setting up this result analysis:
-        YsNotRound=Result_tomRun.x_k(intVars);
-        Ys=round(YsNotRound);
-        knockedYindNotRound=find(1.-YsNotRound);
-        knockedYindRound=find(1.-Ys);
-        knockedVindRobustKnock=yInd(knockedYindRound);
-
-        results.exitFlag = Result_tomRun.ExitFlag;
-        results.organismObjectiveInd = model.organismObjectiveInd;
-        results.chemicalInd = model.chemicalInd;
-        results.chemical = -Result_tomRun.f_k;
-        results.exitFlag = Result_tomRun.ExitFlag;
-        results.ySize = ySize;
-        results.ySum = sum(Result_tomRun.x_k(intVars));
-        results.yLowerBoundry = ySize-K;
-        results.knockedYindRound = knockedYindRound;
-        results.knockedYvalsRound = YsNotRound(knockedYindRound);
-        results.y = Ys;
-        results.knockedVind = knockedVindRobustKnock;
-
-        results.solver = 'cobraSolver';
-
-        % tomlabProblem = mipAssign(osense*c,A,b_L,b_U,lb,ub,x0,'CobraMILP',[],[],intVars);
-        % varWeight = []
-        % KNAPSACK
-        % fIP = []
-        % xIP = []
-        % f_Low = -1E7
-        % x_min = []
-        % x_max = []
-        % f_opt = -141278
-        % x_opt = []
-
+        results.raw = Result_cobra;
+        results.y = Result_cobra.full(intVars(1:ySize));
+        results.q = Result_cobra.full(intVars(ySize+1:ySize+qSize));
+        results.s = Result_cobra.full(intVars(ySize+qSize+1:ySize+qSize+sSize));
+        results.exitFlag = Result_cobra.stat;
+        results.inform = Result_cobra.origStat;
+        results.chemical = -Result_cobra.obj;
+        results.f_k = Result_cobra.obj;
+        results.solver = Result_cobra.solver;
+        
     else
-
         Prob_OptKnock2=mipAssign(-C, A, [], B, lb, ub, [], 'part 3 MILP', ...
                                  setupFile, nProblem, ...
                                  intVars, VarWeight, KNAPSACK, fIP, xIP, ...
                                  f_Low, x_min, x_max, f_opt, x_opt);
-
         disp('setParams')
         Prob_OptKnock2 = setParams(Prob_OptKnock2, false, maxTime);
-        
+
         if printIntermediateSolutions
             disp('setting up callback')
-            global optSwapCallbackOptions;
+            global optSwapCallbackOptions
             optSwapCallbackOptions.outputFile = intermediateSolutionsFile; 
             optSwapCallbackOptions.model = model;
             optSwapCallbackOptions.yInd = yInd;
             optSwapCallbackOptions.qInd = qInd;
             optSwapCallbackOptions.intVars = intVars;
             Prob_OptKnock2.MIP.callback(14) = 1;
+            Prob_OptKnock2.MIP.callback(7) = 1;
         end
         
         disp('tomRun') 
-        Result_tomRun = tomRun('cplex', Prob_OptKnock2, 2);
+        warning('hack to show script hierarchy')
+        Result_tomRun = tomRun('cplex', Prob_OptKnock2, 10);
 
         save('raw results','Result_tomRun');
 
-        results.raw = Result_tomRun;
-        results.C = C;
-        results.A = A;
-        results.B = B;
-        results.lb = lb;
-        results.ub = ub;
-        results.K = K;
-        results.L = L; 
-        results.intVars = intVars;
-        results.yInd = yInd;
-        results.qInd = qInd;
-        results.sInd = sInd;
-        
-        ySize = length(yInd); qSize = length(qInd); sSize = length(sInd);
+        results.raw = Result_tomRun; 
         results.y = Result_tomRun.x_k(intVars(1:ySize));
         results.q = Result_tomRun.x_k(intVars(ySize+1:ySize+qSize));
         results.s = Result_tomRun.x_k(intVars(ySize+qSize+1:ySize+qSize+sSize));
-        
-% TODO: round integer results
-
-%         yqsNotRound=Result_tomRun.x_k(intVars);
-%         yqs=round(yqsNotRound);
-%         knockedYqsIndNotRound=find(1.-yqsNotRound);
-%         knockedYqsIndRound=find(1.-yqs);
-%         knockedYqsIndRobustKnock=yqsInd(knockedYqsIndRound);
-
         results.exitFlag = Result_tomRun.ExitFlag;
         results.inform = Result_tomRun.Inform;
-        results.organismObjectiveInd = model.organsmObjectiveInd;
-        results.chemicalInd = model.chemicalInd;
         results.chemical = -Result_tomRun.f_k;
         results.f_k = Result_tomRun.f_k;
-        results.knockoutRxns = model.rxns(yInd(results.y==0));
-        results.knockoutDhs = model.rxns(qInd(results.q==0));
-        results.knockoutSwaps = model.rxns(sInd(results.s==0));
-%         results.yLowerBoundry = ySize-K;
-%         results.knockedYqsIndRound = knockedYqsIndRound;
-%         results.knockedYvalsRound = yqsNotRound(knockedYqsIndRound);
-%         results.yqs = yqs;
-%         results.knockedVind = knockedYqsIndRobustKnock;
-
-%         results.knockCheck = ...
-%             knockCheck(model, results.knockedVind, coupledFlag, coupled);
-
         results.solver = 'tomlab_cplex';
-        
-        % save('sorted results', 'results');
     end
-
-
+    
+    results.C = C;
+    results.A = A;
+    results.B = B;
+    results.lb = lb;
+    results.ub = ub;
+    results.K = K;
+    results.L = L; 
+    results.intVars = intVars;
+    results.yInd = yInd;
+    results.qInd = qInd;
+    results.sInd = sInd;
+    results.organismObjectiveInd = model.organismObjectiveInd;
+    results.chemicalInd = model.chemicalInd;
+    results.knockoutRxns = model.rxns(yInd(results.y==0));
+    results.knockoutDhs = model.rxns(qInd(results.q==0));
+    results.knockoutSwaps = model.rxns(sInd(results.s==0));
+    % save('sorted results', 'results');
 end
 
 

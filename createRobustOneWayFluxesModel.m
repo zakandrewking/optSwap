@@ -200,7 +200,8 @@ function [model,yInd, yCoupledInd, qInd, qCoupledInd, sInd, sCoupledInd,...
             %find if the gene can be knocked out
         else 
             if useCobraSolver
-                warning('not checking for rxns that error w knockout')
+                % warning('not checking for rxns that error w knockout')
+                % TODO fix warning
                 yInd(end + 1) = i;
                 if (xCoupled), yCoupledInd(end+1) = coupledInd; end
             else

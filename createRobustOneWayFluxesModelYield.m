@@ -184,7 +184,7 @@ function [model, qInd, qCoupledInd, sInd, sCoupledInd,...
     qInd = sort(qInd)'; qCoupledInd = sort(qCoupledInd)';
     sInd = sort(sInd)'; sCoupledInd = sort(sCoupledInd)';
 
-    if length(qCoupledInd) > 0 || length(sCoupledInd) > 0
-        warning('reversible dehydrogenase reactions, Oh My!!!');
-    end
+    % if length(qCoupledInd) > 0 || length(sCoupledInd) > 0
+    %     warning('reversible dehydrogenase reactions, Oh My!!!');
+    % end
 

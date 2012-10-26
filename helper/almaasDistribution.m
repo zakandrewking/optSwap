@@ -15,6 +15,7 @@ function [returnRxns,fluxes,soln] = almaasDistribution(model,options)
 %   usePFBA - true: usePFBA, false: FBA (default)
 %   possibleLoopRxns -
 %   autRemLoops - true: automatically remove possible loops, false (default)
+%   dhCount
 %
 %
 % REF
@@ -38,16 +39,11 @@ function [returnRxns,fluxes,soln] = almaasDistribution(model,options)
     if ~isfield(options,'showPlot'), options.showPlot = true; end
     if ~isfield(options,'possibleLoopRxns'), options.possibleLoopRxns = {}; end
     if ~isfield(options,'autRemLoops'), options.autRemLoops = false; end
-
+    
     dhRxns = locateDHs(model);
-
-
-
+    
     % limit ammonia uptake rate to 100 mmol/g DW/h
     % model = changeRxnBounds(model, 'EX_nh4(e)', -100, 'l');
-
-    % aerobic
-    model = changeRxnBounds(model, 'EX_o2(e)', -20, 'l');
 
     % turn off glucose
     model = changeRxnBounds(model, 'EX_glc(e)', 0, 'l');
@@ -58,29 +54,24 @@ function [returnRxns,fluxes,soln] = almaasDistribution(model,options)
         model.lb(ismember(model.rxns,options.possibleLoopRxns)) = 0;
     end
 
-    % h = waitbar(0,'almaasDistribution');
-
-
-
     fluxes = zeros(length(model.rxns),length(options.subs));
     for i = 1:length(options.subs)
 
         % set carbon substrate bounds
-        modelTemp = changeRxnBounds(model, options.subs{i}, -8, 'l');
+        modelTemp = changeRxnBounds(model, options.subs{i}, -20, 'l');
 
-        if options.autRemLoops
-            warning('this doesn''t work');
-            if options.usePFBA
-                error('cannot automatically remove loops with pFBA');
-                return;
-            end
-            % use FBA
-            soln = optimizeCbModel(modelTemp);
-            remRxns = modelTemp.rxns(soln.x==-1000);
-            modelTemp.rev(ismember(modelTemp.rxns,remRxns)) = 0;
-            modelTemp.lb(ismember(modelTemp.rxns,remRxns)) = 0;
-            
-        end
+        % if options.autRemLoops
+        %     warning('this doesn''t work');
+        %     if options.usePFBA
+        %         error('cannot automatically remove loops with pFBA');
+        %         return;
+        %     end
+        %     % use FBA
+        %     soln = optimizeCbModel(modelTemp);
+        %     remRxns = modelTemp.rxns(soln.x==-1000);
+        %     modelTemp.rev(ismember(modelTemp.rxns,remRxns)) = 0;
+        %     modelTemp.lb(ismember(modelTemp.rxns,remRxns)) = 0;
+        % end
 
         
 
@@ -138,17 +129,16 @@ function [returnRxns,fluxes,soln] = almaasDistribution(model,options)
 
 
     % average fluxes over reactions
-    avgFlux = mean(fluxes,2);
-    % display([fluxes avgFlux])
-
-    sel = abs(avgFlux)>options.threshFlux &...
-          ismember(modelTemp.rxns,dhRxns);
-    returnRxns = model.rxns(sel);
-    fluxes = fluxes(sel);
-
-    % save_to_base(1);
-
-    % close(h)
-
-    % display(size(returnRxns))
+    avgFlux = mean(fluxes(ismember(modelTemp.rxns,dhRxns)),2);
+    % sort the dhRxns
+    dhRxns = model.rxns(ismember(modelTemp.rxns,dhRxns));
+    % find the largest absolute fluxes
+    avgFlux = abs(avgFlux);
+    avgFlux(:,2) = (1:length(avgFlux))';
+    avgFlux = sortrows(avgFlux,-1);
+    returnRxns = cell(options.dhCount,1);
+    for i=1:length(returnRxns)
+        returnRxns(i) = dhRxns(avgFlux(i,2));
+    end
+    fluxes = avgFlux(1:options.dhCount,1);
 end
