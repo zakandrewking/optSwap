@@ -52,6 +52,7 @@ function [model,yInd, yCoupledInd, qInd, qCoupledInd, sInd, sCoupledInd,...
     knockableInd = find(ismember(originalModel.rxns, knockableRxns));
     knockableNum = 0;
 
+    % create irreversible model
     tmp_rxn_num = rxn_num;
     if (coupledFlag)
         for i=1:rxn_num
@@ -172,12 +173,12 @@ function [model,yInd, yCoupledInd, qInd, qCoupledInd, sInd, sCoupledInd,...
     model = tmpModel;
     [n, m] = size(model.S);
 
+    % locate swappable and knockable reactions
     for i=1:rxn_num
         [xCoupled, y] = find(coupled == i);
         if(xCoupled)
             coupledInd = coupled(xCoupled, y+1);
-        end
-
+        end 
        
         if (find(qInd == i))
              % check if reaction is swappable
@@ -199,61 +200,104 @@ function [model,yInd, yCoupledInd, qInd, qCoupledInd, sInd, sCoupledInd,...
             notGeneRelatedNum = notGeneRelatedNum + 1; 
             %find if the gene can be knocked out
         else 
+            % if useCobraSolver
+            %     % warning('not checking for rxns that error w knockout')
+            %     % TODO fix warning
+            %     yInd(end + 1) = i;
+            %     if (xCoupled), yCoupledInd(end+1) = coupledInd; end
+            % else
+                
+            c=zeros(m,1);
+            c(i)=1;
+            ub=model.ub;
+            ub(i)=0;
+            lb=model.lb;
+            lb(i)=0;
+
+            if (xCoupled)
+                c(coupledInd)=-1;
+                ub(coupledInd)=0;
+                lb(coupledInd)=0;
+            end
+
             if useCobraSolver
-                % warning('not checking for rxns that error w knockout')
-                % TODO fix warning
-                yInd(end + 1) = i;
-                if (xCoupled), yCoupledInd(end+1) = coupledInd; end
-            else
-                c=zeros(m,1);
-                c(i)=1;
-                ub=model.ub;
-                ub(i)=0;
-                lb=model.lb;
-                lb(i)=0;
-
-                if (xCoupled)
-                    c(coupledInd)=-1;
-                    ub(coupledInd)=0;
-                    lb(coupledInd)=0;
+                problem1.c = c;
+                problem1.A = model.S;
+                problem1.b = model.row_ub;
+                problem1.ub = ub;
+                problem1.lb = lb;
+                problem1.csense(1:size(model.S,1),1) = 'E';;
+                problem1.osense = -1;
+                if ~(verifyCobraProblem(problem1, [], [], false) == 1)
+                    warning('invalid problem');
+                    exitflag = 0;
                 end
-
+                Result_cobra = solveCobraLP(problem1);
+                if Result_cobra.stat == 1
+                    exitFlag = 0;
+                else
+                    exitFlag = -2;
+                end
+            else 
                 Prob = lpAssign( -c, model.S, model.row_lb, model.row_ub, lb, ub);
                 Result = tomRun('cplex', Prob,0);
+                exitFlag = Result.ExitFlag;
+            end
+            
+            if (exitFlag ~= 0) % error with knockout
+                notYqsInd(end+1) = i;
+                if(xCoupled)
+                    notYqsCoupedInd(end+1) = coupledInd;
+                end
+                errorWithKoNum = errorWithKoNum + 1;
+            else           %check if it makes a difference
+                ub(i)=model.ub(i);
+                lb(i)=model.lb(i);
+                if (coupledInd)
+                    ub(coupledInd)=model.ub(coupledInd);
+                    lb(coupledInd)=model.lb(coupledInd);
+                end
 
-                if (Result.ExitFlag ~=0) % error with knockout
-                    notYqsInd(end+1) = i;
-                    if(xCoupled)
-                        notYqsCoupedInd(end+1) = coupledInd;
+                if useCobraSolver
+                    problem2.c = c;
+                    problem2.A = model.S;
+                    problem2.b = model.row_ub;
+                    problem2.ub = ub;
+                    problem2.lb = lb;
+                    problem2.csense(1:size(model.S,1),1) = 'E';
+                    problem3 = problem2; 
+                    problem2.osense = -1;
+                    problem3.osense = 1;
+                    if ~(verifyCobraProblem(problem2,[],[],false)==1) || ...
+                       ~(verifyCobraProblem(problem3,[],[],false)==1) 
+                        warning('invalid problem');
+                        f_k2 = 0; f_k3 = 1;
+                    else
+                        Result_cobra2 = solveCobraLP(problem2); 
+                        Result_cobra3 = solveCobraLP(problem3);
+                        f_k2 = Result_cobra2.obj;
+                        f_k3 = Result_cobra3.obj;
                     end
-                    errorWithKoNum = errorWithKoNum + 1;
-                else           %check if it makes a difference
-                    ub(i)=model.ub(i);
-                    lb(i)=model.lb(i);
-                    if (coupledInd)
-                        ub(coupledInd)=model.ub(coupledInd);
-                        lb(coupledInd)=model.lb(coupledInd);
-                    end
-
+                else
                     Prob2 = lpAssign( -c, model.S, model.row_lb, model.row_ub, lb, ub);
-                    Result2 = tomRun('cplex', Prob2,0);
-
+                    Result2 = tomRun('cplex', Prob2,0); 
                     Prob3 = lpAssign( c, model.S, model.row_lb, model.row_ub, lb, ub);
                     Result3 = tomRun('cplex', Prob3,0);
-
-                    if (Result3.f_k == Result2.f_k)
-                        notYqsInd(end+1)=i;
-                        if(xCoupled)
-                            notYqsCoupedInd(end+1)=coupledInd;
-                        end
-                        noInfluenceNum = noInfluenceNum+1;
-                    else
-                        yInd(end+1)=i;
-                        if(xCoupled)
-                            yCoupledInd(end+1)=coupledInd;
-                        end
+                    f_k2 = Result2.f_k;
+                    f_k3 = Result3.f_k;
+                end
+                if (f_k2 == f_k3)
+                    notYqsInd(end+1)=i;
+                    if(xCoupled)
+                        notYqsCoupedInd(end+1)=coupledInd;
                     end
-                end 
+                    noInfluenceNum = noInfluenceNum+1;
+                else
+                    yInd(end+1)=i;
+                    if(xCoupled)
+                        yCoupledInd(end+1)=coupledInd;
+                    end
+                end
             end
         end
     end
@@ -268,8 +312,3 @@ function [model,yInd, yCoupledInd, qInd, qCoupledInd, sInd, sCoupledInd,...
     yInd = sort(yInd)'; yCoupledInd = sort(yCoupledInd)';
     qInd = sort(qInd)'; qCoupledInd = sort(qCoupledInd)';
     sInd = sort(sInd)'; sCoupledInd = sort(sCoupledInd)';
-
-    if length(qCoupledInd) > 0 || length(sCoupledInd) > 0
-        warning('reversible dehydrogenase reactions, Oh My!!!');
-    end
-

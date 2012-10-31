@@ -30,10 +30,12 @@ function runOptSwap(opt)
     if ~isfield(opt, 'aerobicString'), opt.aerobicString = 'anaerobic'; end
     if ~isfield(opt, 'maxTime'), opt.maxTime = 60; end
     if ~isfield(opt, 'substrate'), opt.substrate = 'EX_glc(e)'; end
-    if ~isfield(opt, 'printIntermediateSolutions')
+    if ~isfield(opt, 'printIntermediateSolutions') % unfinished
         opt.printIntermediateSolutions = false; 
     end
     if ~isfield(opt, 'useCobraSolver'), opt.useCobraSolver = false; end
+    if ~isfield(opt, 'canKnockDHs'), opt.canKnockDHs = false; end
+    if ~isfield(opt, 'knockType'), opt.knockType = 2; end
     
     % make variables local
     knockoutNum = opt.knockoutNum;
@@ -51,6 +53,8 @@ function runOptSwap(opt)
     substrate = opt.substrate;
     printIntermediateSolutions = opt.printIntermediateSolutions;
     useCobraSolver = opt.useCobraSolver;
+    canKnockDHs = opt.canKnockDHs;
+    knockType = opt.knockType
 
     % check values
     if ~iscell(targetRxns)
@@ -58,8 +62,16 @@ function runOptSwap(opt)
     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-    dhRxns = dhRxnList(31);
+    % allow knockout of dhRxns
+    if canKnockDHs
+        if swapNum>0, error('cannot knock dehydrogenases if swapsNum > 0'); end
+        dhRxns = [];
+        knockableRxns = dhRxnList(31);
+    else
+        dhRxns = dhRxnList(31); 
+        knockableRxns = {};
+    end
+    
     fprintf('%d dehydrogenase reactions\n', length(dhRxns));
 
     % name the run
@@ -127,13 +139,14 @@ function runOptSwap(opt)
     fprintf('Number of selected reactions: %d\n', length(selectedRxns))
 
     % remove dhRxns from set if they are not in reduced model
-    dhRxns(~ismember(dhRxns, reducedModel.rxns)) = [];
-
+    if ~isempty(dhRxns)
+        dhRxns(~ismember(dhRxns, reducedModel.rxns)) = [];
+    end
+    
     % set options
-    options.useCobraSolver = 0;
-    options.knockType = 2; % optSwap
+    options.knockType = knockType;
     options.knockoutNum = knockoutNum;
-    % options.knockableRxns = {};
+    options.knockableRxns = knockableRxns;
     notSelectedRxns = reducedModel.rxns(~ismember(reducedModel.rxns,selectedRxns));
     options.notKnockableRxns = notSelectedRxns;
     options.swapNum = swapNum;
@@ -213,10 +226,9 @@ function runOptSwap(opt)
             myPrint(',', []);
         end
         myPrint('%d,', results.exitFlag);
-        myPrint('%d,', results.inform);
+        myPrint('%s,', results.inform);
+        myPrint('%s,', results.solver);
     end
-    % t = toc(ticID);
-    % myPrint('time (min),%.1f', t/60);
     fclose(fileId);
 end
 

@@ -1,4 +1,4 @@
-function productionEnvelopeForSwaps(targetRxns,swaps,kos)
+function productionEnvelopeForSwaps(targetRxns,swaps,kos,aerobicString,substrate)
 % productionEnvelopeForSwaps
 %
 % INPUTS
@@ -14,27 +14,34 @@ function productionEnvelopeForSwaps(targetRxns,swaps,kos)
     run = 'pipe test';
 
     % check inputs
-    if nargin < 1
-        targetRxns = 'EX_ac(e)';
+    % if nargin < 1
+    %     targetRxns = 'EX_ac(e)';
+    % end
+    % if nargin < 2
+    %     swaps = {
+    %         {}
+    %         {'GLUDy';'MDH';'PGCD';}
+    %         {}
+    %         {'GLUDy';'MDH';'PGCD';}
+    %         {'GLUDy';'GND';'LCARR';'MDH';'PGCD'}
+    %             };
+    % end
+    % if nargin < 3
+    %     kos = {
+    %         {}
+    %         {}
+    %         {'DRPA';'F6PA';'TPI';}
+    %         {'EDA';'F6PA';'TPI';}
+    %         {'EDA';'F6PA';'PGM';'PPKr';'TPI';}
+    %           };
+    % end
+    if nargin < 4
+        aerobicString = 'anaerobic';
+    end  
+    if nargin < 5
+        substrate = 'EX_glc(e)';
     end
-    if nargin < 2
-        swaps = {
-            {}
-            {'GLUDy';'MDH';'PGCD';}
-            {}
-            {'GLUDy';'MDH';'PGCD';}
-            {'GLUDy';'GND';'LCARR';'MDH';'PGCD'}
-                };
-    end
-    if nargin < 3
-        kos = {
-            {}
-            {}
-            {'DRPA';'F6PA';'TPI';}
-            {'EDA';'F6PA';'TPI';}
-            {'EDA';'F6PA';'PGM';'PPKr';'TPI';}
-              };
-    end
+      
     if isempty(swaps)
         swaps = cell(size(kos));
     elseif isempty(kos)
@@ -51,7 +58,7 @@ function productionEnvelopeForSwaps(targetRxns,swaps,kos)
     % setup model
     keepWtDh = false;
     global biomassRxn
-    [model, biomassRxn] = setupModel('iJO','EX_glc(e)','anaerobic','THKO');
+    [model, biomassRxn] = setupModel('iJO',substrate,aerobicString,'THKO');
 
     color = {'k', 'Blue', 'Red', 'Green'};
     lineStyle = {'-', '--', '-.', ':'};

@@ -4,39 +4,39 @@ function results = optSwap(model, opt)
 %
 % INPUTS
 % model
-% dhRxns
 %
 % OPTIONAL
 % opt - struct with an of the following options:
 %   knockType - 2 run OptSwap; 1 run robustKnock; 0 run OptKnock (broken)
 %   targetRxn - chemical to produce
+%   swapNum - number of swaps
 %   knockoutNum - number of knockouts
 %   knockableRxns - reactions that should definitely be considered for knockout
 %   notKnockableRxns - reactions that should be excluded from knockout
-%   useCobraSolver - (unfinished) 1 use any cobra solver; 0 use tomlab cplex solver
+%   useCobraSolver - 1 use any cobra solver; 0 use tomlab cplex solver
 %   maxW - maximal value of dual variables (higher number will be more
 %          accurate but takes more calculation time)
 %   biomassRxn 
-%   % FOR OPTSWAP:
-%   swapNum - number of swaps
 %   dhRxns - dehydrogenase reaction list
 %   maxTime - time limit in minutes
-%   printIntermediateSolutions
-%   intermediateSolutionsFile
+%   printIntermediateSolutions - (unfinished)
+%   intermediateSolutionsFile - (unfinished)
 %
 % OUTPUTS
 % results
 
-
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Set up parameters
     if nargin < 1, error('Not enough arguments'); end
 
     % set default parameters
     if ~exist('opt','var')
         opt = struct();
     end
-    if ~isfield(opt,'targetRxn'), opt.targetRxn = 'EX_for(e)'; end
-    if ~isfield(opt,'knockoutNum'), opt.knockoutNum = 3; end
     if ~isfield(opt,'knockType'), opt.knockType = 0; end
+    if ~isfield(opt,'targetRxn'), opt.targetRxn = 'EX_for(e)'; end
+    if ~isfield(opt,'swapNum'), opt.swapNum = 0; end
+    if ~isfield(opt,'knockoutNum'), opt.knockoutNum = 3; end
     if ~isfield(opt,'knockableRxns'), opt.knockableRxns = {}; end
     if ~isfield(opt,'notKnockableRxns'), opt.notKnockableRxns = {}; end
     if ~isfield(opt,'useCobraSolver'), opt.useCobraSolver = 0; end
@@ -50,7 +50,6 @@ function results = optSwap(model, opt)
     if ~isfield(opt,'biomassRxn')
         opt.biomassRxn = model.rxns(model.c~=0);
     end
-    if ~isfield(opt,'swapNum'), opt.swapNum = 0; end
     if ~isfield(opt,'dhRxns'), opt.dhRxns = {}; end
     if ~isfield(opt, 'maxTime'), opt.maxTime = []; end
     if ~isfield(opt, 'printIntermediateSolutions')
@@ -59,44 +58,55 @@ function results = optSwap(model, opt)
     if ~isfield(opt, 'intermediateSolutionsFile')
         opt.intermediateSolutionsFile = [];
     end
-        
-    
-    % set global variables
+
+    % name global variables
     global maxTime printIntermediateSolutions
     global intermediateSolutionsFile useCobraSolver
+    
+    % set local variables
+    knockType = opt.knockType;
+    targetRxn = opt.targetRxn;
+    swapNum = opt.swapNum;
+    knockoutNum = opt.knockoutNum;
+    knockableRxns = opt.knockableRxns;
+    notKnockableRxns = opt.notKnockableRxns;
+    useCobraSolver = opt.useCobraSolver;
+    maxW = opt.maxW;
+    biomassRxn = opt.biomassRxn;
+    dhRxns = opt.dhRxns;
     maxTime = opt.maxTime;
     printIntermediateSolutions = opt.printIntermediateSolutions;
     intermediateSolutionsFile = opt.intermediateSolutionsFile;
-    useCobraSolver = opt.useCobraSolver;
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     printLevel = 10;
     
-    if (opt.knockType == 2)
+    if (knockType == 2)
         % perform swaps
-        [model, newNames, qsCoupling] = modelSwap(model, opt.dhRxns, true);
+        [model, newNames, qsCoupling] = modelSwap(model, dhRxns, true);
     else
         qsCoupling = [];
     end
 
-    chemicalInd = find(ismember(model.rxns, opt.targetRxn));
+    chemicalInd = find(ismember(model.rxns, targetRxn));
     if printLevel>=3, display(sprintf('chemical index %d', chemicalInd)); end
     
     %parameters
     findMaxWFlag=0;
     P=1;
     coupledFlag = 1;
-    K = opt.knockoutNum;
-    L = opt.swapNum;
+    K = knockoutNum;
+    L = swapNum;
     
     disp('preparing model')
-    consModel = prepareOptSwapModel(model, chemicalInd, opt.biomassRxn);
+    consModel = prepareOptSwapModel(model, chemicalInd, biomassRxn);
 
     disp('createRobustOneWayFluxesModel')
     [model, yInd, yCoupledInd, qInd, qCoupledInd, sInd, sCoupledInd,...
-     notYqsInd, notYqsCoupedInd, m, n, coupled] = ...
-                createRobustOneWayFluxesModel(consModel, chemicalInd, coupledFlag, ...
-                                      opt.knockableRxns, opt.notKnockableRxns, qsCoupling,...
-                                              useCobraSolver);
+                          notYqsInd, notYqsCoupedInd, m, n, coupled] = ...
+      createRobustOneWayFluxesModel(consModel, chemicalInd, coupledFlag, ...
+                                    knockableRxns, notKnockableRxns, ...
+                                    qsCoupling, useCobraSolver);
   
     
     % sizes
@@ -122,7 +132,7 @@ function results = optSwap(model, opt)
     yqsCoupledSize = yCoupledSize + qCoupledSize + sCoupledSize;
     
     % optSwap diverges here
-    if (opt.knockType==0 || opt.knockType==1)
+    if (knockType==0 || knockType==1)
 
         coupledYSize = size(yCoupledInd, 1);
         coupledYInd = yCoupledInd;
@@ -193,7 +203,7 @@ function results = optSwap(model, opt)
         %-[A,Ay]*[v;y]>=-B
         disp('separateTransposeJoin')
         [A_w, Ay_w ,B_w,C_w, lb_w, ub_w, wSize, wZs] = ...
-            separateTransposeJoin(-A, -Ay,-B,-C,ySize, 1,  m, opt.maxW,findMaxWFlag, zSize);
+            separateTransposeJoin(-A, -Ay,-B,-C,ySize, 1,  m, maxW,findMaxWFlag, zSize);
         %max C_w(w  z)'
         %s.t
         %[A_w  Ay_w]*(w z y)  <=  B_w
@@ -232,7 +242,7 @@ function results = optSwap(model, opt)
 
 
 
-        if (opt.knockType == 0)
+        if (knockType == 0)
             disp('optKnock')
 
 
@@ -241,7 +251,7 @@ function results = optSwap(model, opt)
                                       model, yInd, [], [], K, [], ...
                                       coupledFlag, coupled);
 
-        elseif (opt.knockType == 1)
+        elseif (knockType == 1)
             disp('robustKnock')
             %**************************************************************************
             %part 3
@@ -284,7 +294,7 @@ function results = optSwap(model, opt)
             disp('separateTransposeJoin')
             [A2_w, Ay2_w ,B2_w,C2_w, lb2_w, ub2_w, uSize, uZs]=...
                 separateTransposeJoin(A2, Ay2,B2,C2 ,ySize, 1,  vSize+wSize+zSize,...
-                                      opt.maxW,findMaxWFlag, zSizeOptKnock2);
+                                      maxW,findMaxWFlag, zSizeOptKnock2);
 
             %max C2_w*x'
             %s.t
@@ -327,7 +337,7 @@ function results = optSwap(model, opt)
                                       coupledFlag, coupled); 
         end
         
-    elseif (opt.knockType == 2) 
+    elseif (knockType == 2) 
         disp('optSwap');
         
         %part 2
@@ -465,7 +475,7 @@ function results = optSwap(model, opt)
         disp('separateTransposeJoin')
         [A_w, Ayqs_w ,B_w,C_w, lb_w, ub_w, wSize, wZs] = ...
             separateTransposeJoin(-A, -Ayqs, -B, -C, yqsSize, ...
-                                  1,  m, opt.maxW, findMaxWFlag, zSize);
+                                  1,  m, maxW, findMaxWFlag, zSize);
         %max C_w(w  z)'
         %s.t
         %[A_w  Ayqs_w]*(w z y)  <=  B_w
@@ -521,7 +531,7 @@ function results = optSwap(model, opt)
         [A2_w, Ayqs2_w ,B2_w,C2_w, lb2_w, ub2_w, uSize, ~]=...
             separateTransposeJoin(A2, Ayqs2, B2, C2, yqsSize, ...
                                   1,  vSize+wSize+zSize, ...
-                                  opt.maxW,findMaxWFlag, zSizeOptKnock2);
+                                  maxW,findMaxWFlag, zSizeOptKnock2);
 
         
         
@@ -536,7 +546,9 @@ function results = optSwap(model, opt)
         [ARow, ACol] = size(A);
 
         sCoupledMatrix = zeros(qSize, qSize);
-        qsCoupling_S = qsCoupling(:,2);
+        if ~isempty(qsCoupling)
+            qsCoupling_S = qsCoupling(:,2);
+        end
         for i = 1:qSize
             thisSIndex = qsCoupling_S(qsCoupling(:,1)==qInd(i));
             sCoupledMatrix(i,sInd==thisSIndex) = 1;
@@ -617,6 +629,7 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
     disp('set up MILP')
     global useCobraSolver
     if (useCobraSolver)
+        % maximize
         MILPproblem.c = C;
         MILPproblem.osense = -1;
         MILPproblem.A = A;
@@ -633,7 +646,7 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
             disp('setting up callback')
             warning('not finished')
         end
-        [MILPproblem,solverParams] = setParams(MILPproblem, true, maxTime); 
+        [MILPproblem, solverParams] = setParams(MILPproblem, true, maxTime); 
         disp('Run COBRA MILP')
         Result_cobra = solveCobraMILP(MILPproblem,solverParams);
 
@@ -646,8 +659,9 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
         results.chemical = -Result_cobra.obj;
         results.f_k = Result_cobra.obj;
         results.solver = Result_cobra.solver;
-        
+        save results
     else
+        % minimize
         Prob_OptKnock2=mipAssign(-C, A, [], B, lb, ub, [], 'part 3 MILP', ...
                                  setupFile, nProblem, ...
                                  intVars, VarWeight, KNAPSACK, fIP, xIP, ...

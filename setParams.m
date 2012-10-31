@@ -21,6 +21,7 @@ function [newProb,solverParams] = setParams(prob, cobraSolverFlag, maxTime)
         solverParams.relMipGapTol = relMipGapTol;
         solverParams.timeLimit = timeLimit;
         solverParams.logFile = logFile;
+        solverParams.printLevel = printLevel;
         % if USE_MIP_FOCUS_1, solverParams.MIPFocus = 1;
         % else solverParams.MIPFocus = 3;
         % end
