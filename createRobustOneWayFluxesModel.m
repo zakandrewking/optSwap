@@ -302,10 +302,10 @@ function [model,yInd, yCoupledInd, qInd, qCoupledInd, sInd, sCoupledInd,...
         end
     end
 
-    notY.notGeneRelatedNum = notGeneRelatedNum;
-    notY.errorWithKoNum = errorWithKoNum;
-    notY.noInfluenceNum = noInfluenceNum;
-    notY.notKnockableNum = length(notKnockableRxns);
+    notY.notGeneRelatedNum = notGeneRelatedNum
+    notY.errorWithKoNum = errorWithKoNum
+    notY.noInfluenceNum = noInfluenceNum
+    notY.notKnockableNum = length(notKnockableRxns)
 
     notYqsInd = sort(notYqsInd)';
     notYqsCoupedInd = sort(notYqsCoupedInd)';
