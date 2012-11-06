@@ -68,9 +68,9 @@ function runOptSwap(opt)
     if canKnockDHs
         if swapNum>0, error('cannot knock dehydrogenases if swapsNum > 0'); end
         dhRxns = [];
-        knockableRxns = dhRxnList(31);
+        knockableRxns = dhRxnList(30);
     else
-        dhRxns = dhRxnList(31); 
+        dhRxns = dhRxnList(30); 
         knockableRxns = {};
     end
     

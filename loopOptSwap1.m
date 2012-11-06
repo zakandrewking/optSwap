@@ -4,9 +4,9 @@ function loopOptSwap1
     cleaner = onCleanup(@() cleanup);
     global run status
     status = 'starting';    
-    run = 'best of 1--13 products--anaerobic aerobic glucose xylose';
+    run = 'best of 2--13 products--anaerobic aerobic glucose xylose';
     
-    interventionNum = 1;
+    interventionNum = 2;
     aer = {'anaerobic','aerobic','anaerobic','aerobic'};
     substrates = {'EX_glc(e)','EX_glc(e)','EX_xyl-D(e)','EX_xyl-D(e)'};
     for i=1:1
