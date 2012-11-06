@@ -12,6 +12,7 @@ function runOptSwap(opt)
     end
     if ~isfield(opt,'knockoutNum'), opt.knockoutNum = 0; end
     if ~isfield(opt, 'swapNum'), opt.swapNum = 0; end
+    if ~isfield(opt, 'interventionNum'), opt.interventionNum = -1; end
     if ~isfield(opt, 'targetRxns')
         opt.targetRxns = {
             'EX_etoh(e)',
@@ -40,6 +41,7 @@ function runOptSwap(opt)
     % make variables local
     knockoutNum = opt.knockoutNum;
     swapNum = opt.swapNum;
+    interventionNum = opt.interventionNum;
     targetRxns = opt.targetRxns;
     startWithKnocks = opt.startWithKnocks;
     startWithSwaps = opt.startWithSwaps;
@@ -146,6 +148,7 @@ function runOptSwap(opt)
     % set options
     options.knockType = knockType;
     options.knockoutNum = knockoutNum;
+    options.interventionNum = interventionNum;
     options.knockableRxns = knockableRxns;
     notSelectedRxns = reducedModel.rxns(~ismember(reducedModel.rxns,selectedRxns));
     options.notKnockableRxns = notSelectedRxns;

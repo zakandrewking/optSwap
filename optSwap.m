@@ -9,8 +9,9 @@ function results = optSwap(model, opt)
 % opt - struct with an of the following options:
 %   knockType - 2 run OptSwap; 1 run robustKnock; 0 run OptKnock (broken)
 %   targetRxn - chemical to produce
-%   swapNum - number of swaps
-%   knockoutNum - number of knockouts
+%   swapNum - number of swaps (-1 no limit)
+%   knockoutNum - number of knockouts (-1 no limit)
+%   interventionNum - maximum number of interventions (-1 no limit)
 %   knockableRxns - reactions that should definitely be considered for knockout
 %   notKnockableRxns - reactions that should be excluded from knockout
 %   useCobraSolver - 1 use any cobra solver; 0 use tomlab cplex solver
@@ -37,6 +38,7 @@ function results = optSwap(model, opt)
     if ~isfield(opt,'targetRxn'), opt.targetRxn = 'EX_for(e)'; end
     if ~isfield(opt,'swapNum'), opt.swapNum = 0; end
     if ~isfield(opt,'knockoutNum'), opt.knockoutNum = 3; end
+    if ~isfield(opt,'interventionNum'), opt.interventionNum = -1; end
     if ~isfield(opt,'knockableRxns'), opt.knockableRxns = {}; end
     if ~isfield(opt,'notKnockableRxns'), opt.notKnockableRxns = {}; end
     if ~isfield(opt,'useCobraSolver'), opt.useCobraSolver = 0; end
@@ -68,6 +70,7 @@ function results = optSwap(model, opt)
     targetRxn = opt.targetRxn;
     swapNum = opt.swapNum;
     knockoutNum = opt.knockoutNum;
+    interventionNum = opt.interventionNum;
     knockableRxns = opt.knockableRxns;
     notKnockableRxns = opt.notKnockableRxns;
     useCobraSolver = opt.useCobraSolver;
@@ -97,6 +100,7 @@ function results = optSwap(model, opt)
     coupledFlag = 1;
     K = knockoutNum;
     L = swapNum;
+    X = interventionNum;
     
     disp('preparing model')
     consModel = prepareOptSwapModel(model, chemicalInd, biomassRxn);
@@ -556,12 +560,11 @@ function results = optSwap(model, opt)
         A3 = [
         %dual constraints
             A2_w, sparse(A2_wRow,ACol), Ayqs2_w;   %  19316       23762
-        %y sum constraints
-            zeros(1, uSize + zSizeOptKnock2 + vSize),  -ones(1,ySize), ...
-                       zeros(1, qSize + sSize); % 1       23762
         % q sum constraints
             zeros(1, uSize + zSizeOptKnock2 + vSize + ySize), -ones(1, qSize),...
                        zeros(1, sSize); %  1       23762
+        % total sum constraints
+            
         % swap constraints
             zeros(qSize, uSize + zSizeOptKnock2 + vSize + ySize), ...
                        eye(qSize), sCoupledMatrix;
@@ -573,13 +576,34 @@ function results = optSwap(model, opt)
 
         B3=[
             B2_w;
-            K - ySize;
-            L - qSize; 
             ones(qSize, 1);
             -ones(qSize, 1);
             B
            ];
-
+        
+        % add knockout and swap count constraints
+        if K >= 0 % knockoutNum
+            A3 = [A3; ...
+                  zeros(1, uSize + zSizeOptKnock2 + vSize), ...
+                  -ones(1, ySize), ...
+                  zeros(1, qSize + sSize);];
+            B3 = [B3; K - ySize];
+        end
+        if L >= 0 % swapNum
+            A3 = [A3; ...
+                  zeros(1, uSize + zSizeOptKnock2 + vSize + ySize), ...
+                  -ones(1, qSize),...
+                  zeros(1, sSize)];
+            B3 = [B3; L - qSize; ];
+        end
+        if X >= 0 % interventionNum
+            A3 = [A3; ...
+                  zeros(1, uSize + zSizeOptKnock2 + vSize), ...
+                  -ones(1, ySize), -ones(1, qSize), ...
+                  zeros(1, sSize)];
+            B3 = [B3; X - ySize - qSize];
+        end
+        
         C3=[
             C2_w;
             zeros(ACol, 1);
