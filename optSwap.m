@@ -563,8 +563,10 @@ function results = optSwap(model, opt)
             zeros(1, uSize + zSizeOptKnock2 + vSize + ySize), -ones(1, qSize),...
                        zeros(1, sSize); %  1       23762
         % swap constraints
-            zeros(qSize, uSize + zSizeOptKnock2 + vSize + ySize), eye(qSize), sCoupledMatrix;
-            zeros(qSize, uSize + zSizeOptKnock2 + vSize + ySize), -eye(qSize), -sCoupledMatrix; %  27       23762
+            zeros(qSize, uSize + zSizeOptKnock2 + vSize + ySize), ...
+                       eye(qSize), sCoupledMatrix;
+            zeros(qSize, uSize + zSizeOptKnock2 + vSize + ySize), ...
+                       -eye(qSize), -sCoupledMatrix;
         %feasibility constraint
             sparse(ARow,uSize+zSizeOptKnock2), A, Ayqs   % 10134       23762
            ];
@@ -598,7 +600,7 @@ function results = optSwap(model, opt)
             ysUpperBound
               ];
         intVars = (A2_wCol + ACol + 1):(A2_wCol + ACol + yqsSize);
-       
+        
         results = setupAndRunMILP(C3, A3, B3, lb3, ub3, intVars, ...
                                   model, yInd, qInd, sInd, K, L, ...
                                   coupledFlag, coupled);

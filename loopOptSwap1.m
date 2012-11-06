@@ -39,7 +39,7 @@ function loopOptSwap1
         opt.maxTime = 12*60; %min
         opt.useCobraSolver = true;
         opt.canKnockDHs = true; 
-        opt.knockType = 1;
+        opt.knockType = 2
         runOptSwap(opt);
     end
     status = 'finished';
