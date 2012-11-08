@@ -229,7 +229,11 @@ function runOptSwap(opt)
             myPrint(',', []);
         end
         myPrint('%d,', results.exitFlag);
-        myPrint('%s,', results.inform);
+        if isnumeric(results.inform)
+            myPrint('%d', results.inform);
+        else
+            myPrint('%s,', results.inform);
+        end
         myPrint('%s,', results.solver);
     end
     fclose(fileId);
