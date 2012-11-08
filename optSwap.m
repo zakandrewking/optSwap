@@ -560,11 +560,6 @@ function results = optSwap(model, opt)
         A3 = [
         %dual constraints
             A2_w, sparse(A2_wRow,ACol), Ayqs2_w;   %  19316       23762
-        % q sum constraints
-            zeros(1, uSize + zSizeOptKnock2 + vSize + ySize), -ones(1, qSize),...
-                       zeros(1, sSize); %  1       23762
-        % total sum constraints
-            
         % swap constraints
             zeros(qSize, uSize + zSizeOptKnock2 + vSize + ySize), ...
                        eye(qSize), sCoupledMatrix;
