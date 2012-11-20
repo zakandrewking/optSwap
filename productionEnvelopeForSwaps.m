@@ -13,28 +13,28 @@ function productionEnvelopeForSwaps(targetRxns,swaps,kos,aerobicString,substrate
     status = 'starting';
     run = 'pipe test';
 
-    % check inputs
-    % if nargin < 1
-    %     targetRxns = 'EX_ac(e)';
-    % end
-    % if nargin < 2
-    %     swaps = {
-    %         {}
-    %         {'GLUDy';'MDH';'PGCD';}
-    %         {}
-    %         {'GLUDy';'MDH';'PGCD';}
-    %         {'GLUDy';'GND';'LCARR';'MDH';'PGCD'}
-    %             };
-    % end
-    % if nargin < 3
-    %     kos = {
-    %         {}
-    %         {}
-    %         {'DRPA';'F6PA';'TPI';}
-    %         {'EDA';'F6PA';'TPI';}
-    %         {'EDA';'F6PA';'PGM';'PPKr';'TPI';}
-    %           };
-    % end
+    % check inputs 
+    if nargin < 1
+        targetRxns = 'EX_ac(e)';
+    end
+    if nargin < 2
+        swaps = {
+            {}
+            {'GLUDy';'MDH';'PGCD';}
+            {}
+            {'GLUDy';'MDH';'PGCD';}
+            {'GLUDy';'GND';'LCARR';'MDH';'PGCD'}
+                };
+    end
+    if nargin < 3
+        kos = {
+            {}
+            {}
+            {'DRPA';'F6PA';'TPI';}
+            {'EDA';'F6PA';'TPI';}
+            {'EDA';'F6PA';'PGM';'PPKr';'TPI';}
+              };
+    end
     if nargin < 4
         aerobicString = 'anaerobic';
     end  
@@ -61,7 +61,7 @@ function productionEnvelopeForSwaps(targetRxns,swaps,kos,aerobicString,substrate
     [model, biomassRxn] = setupModel('iJO',substrate,aerobicString,'THKO');
 
     color = {'k', 'Blue', 'Red', 'Green'};
-    lineStyle = {'-', '--', '-.', ':'};
+    lineStyle = {'-', '--', '-', '--'};
     
     figure()
     hold on
@@ -90,17 +90,36 @@ function productionEnvelopeForSwaps(targetRxns,swaps,kos,aerobicString,substrate
         if i < length(color)
             set(lineHandle, 'Color', color{i});
             set(lineHandle, 'LineStyle', lineStyle{i});
+            set(lineHandle, 'LineWidth', 1.5);
         end
 
         printCoupledYield(modelT, targetRxns{i});
     end
-    legendH = legend('show');
-    set(legendH, 'Interpreter', 'none');
-    ylabel('Production (mmol/gDW h)');
-    xlabel('Growth rate (1/h)');
+    hYLabel = ylabel('Production (mmol/gDW h)');
+    hXLabel = xlabel('Growth rate (1/h)');
+    
+    hLegend = legend('show');
+    set(hLegend, 'Interpreter', 'none');
+    set([hLegend gca hXLabel, hYLabel], 'FontSize', 10);
+    set([gca hXLabel, hYLabel], 'FontName', 'Helvetica');
     set(gcf, 'Color', 'White')
+    set(gcf, 'PaperPositionMode', 'auto');
+    set(gcf, 'Units', 'pixels');
+    set(gcf, 'Position', [500 500 200 140]);
+    set(gca, ...
+        'Box'         , 'on'     , ...
+        'TickDir'     , 'in'     , ...
+        'TickLength'  , [.015 .015] , ...
+        'XMinorTick'  , 'off'      , ...
+        'YMinorTick'  , 'off'      , ...
+        'YTick'       , 0:10:80, ...
+        'XTick', 0:0.1:2.0, ... %'XTick', 0:0.2:2.0, ...
+        'LineWidth'   , 1         );
+    
+    %set(hTitle, 'FontSize', 12, 'FontWeight', 'bold');
+    legend('off')
     hold off
-    % title();
+    print -depsc2 finalPlot.eps
     status = 'finished';
 end
 

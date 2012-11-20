@@ -8,7 +8,7 @@ function maxYield
     cleaner = onCleanup(@() cleanup);
     global run status
     status = 'starting';
-    run = 'max-yield_all-forward-transporters_w-NADTRHD-open-case';
+    run = 'max-yield_ala-L';
 
     logFile = sprintf('%s-%s.csv', run, datestr(now, 'yy-mm-dd_HH_MM_SS'));
     fileId = fopen(logFile, 'w');
@@ -27,9 +27,7 @@ function maxYield
     model = changeRxnBounds(model, biomassRxn, growthMin, 'l');
 
     % get all exchange reactions
-    targetRxns = {'EX_etoh(e)';
-                  'EX_lac-D(e)';
-                  'EX_ala-L(e)';};
+    targetRxns = {'EX_ala-L(e)';};
     % turn on special cases
     % model = makeFumTransporterReversible(model);
 
