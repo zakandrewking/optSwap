@@ -5,6 +5,8 @@ function productionEnvelopeForSwaps(targetRxns,swaps,kos,aerobicString,substrate
 % targetRxn
 % swaps
 % kos
+% aerobicString
+% substrate
 %
 % Zachary King 9/12/12
 
@@ -63,7 +65,7 @@ function productionEnvelopeForSwaps(targetRxns,swaps,kos,aerobicString,substrate
     color = {'k', 'Blue', 'Red', 'Green'};
     lineStyle = {'-', '--', '-', '--'};
     
-    figure()
+    %figure()
     hold on
     for i=1:length(targetRxns)
         status = sprintf('run%d', i);
