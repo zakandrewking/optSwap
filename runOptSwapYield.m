@@ -20,7 +20,7 @@ function runOptSwapYield(options)
         opt.biomassRxn = biomassRxn;
         opt.swapNum = swapNum;
         opt.minBiomass = 0.1;
-        opt.dhRxns = dhRxnList('manual');
+        opt.dhRxns = dhRxnList(30);
         results = optSwapYield(modelT, opt);
         myPrint('%s',targetRxns{i});
         myPrint('%s,', aerobicString);
@@ -53,6 +53,8 @@ function printReactions(reactions)
 end
 
 function rxns = returnTargetRxns()
+    rxns = {'EX_val-L(e)'};
+    %{
     rxns =  {'EX_h2s(e)';
              'EX_cys-L(e)';
              'EX_hom-L(e)';
@@ -142,4 +144,5 @@ function rxns = returnTargetRxns()
              'EX_12ppd-R(e)';
              'EX_succ(e)';
              'EX_for(e)';};
+    %}
 end

@@ -8,7 +8,7 @@ function maxYield
     cleaner = onCleanup(@() cleanup);
     global run status
     status = 'starting';
-    run = 'max-yield_ala-L';
+    run = 'max-yield_all-forward-transporters-valine';
 
     logFile = sprintf('%s-%s.csv', run, datestr(now, 'yy-mm-dd_HH_MM_SS'));
     fileId = fopen(logFile, 'w');
@@ -25,11 +25,12 @@ function maxYield
     % load model
     [model, biomassRxn] = setupModel('iJO', 'none', 'aerobic', 'noTHKO');
     model = changeRxnBounds(model, biomassRxn, growthMin, 'l');
+    model.c(:) = 0;
 
     % get all exchange reactions
-    targetRxns = {'EX_ala-L(e)';};
+    targetRxns = model.rxns(findExcRxns(model));
     % turn on special cases
-    % model = makeFumTransporterReversible(model);
+    model = makeFumTransporterReversible(model);
 
     for m=1:length(targetRxns)
         model_m = model;

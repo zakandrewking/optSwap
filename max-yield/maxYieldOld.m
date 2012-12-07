@@ -8,7 +8,7 @@ function maxYieldOld
     cleaner = onCleanup(@() cleanup);
     global run status
     status = 'starting';
-    run = 'max-yield_all-forward-transporters_POR5-rev';
+    run = 'max-yield_all-forward-transporters';
     
     logFile = sprintf('%s-%s.csv', run, datestr(now, 'yy-mm-dd_HH_MM_SS'));
     fileId = fopen(logFile, 'a');
@@ -16,7 +16,9 @@ function maxYieldOld
 
     % load model
     model = loadModelNamed('iJO');
-    [model, biomassRxn] = setupModel('iJO','EX_glc(e)', 'anaerobic', 'noTHKO','POR5_rev');
+    [model, biomassRxn] = setupModel('iJO','EX_glc(e)', 'anaerobic', ...
+                                           'noTHKO');
+    model.c(:) = 0;
     
     % get all exchange reactions
     targetRxns = model.rxns(findExcRxns(model));
