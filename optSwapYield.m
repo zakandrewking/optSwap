@@ -38,11 +38,6 @@ function results = optSwapYield(model, opt)
     maxTime = opt.maxTime;
 
     printLevel = 10;
-
-    % Make dehydrogenases irreversible
-    % TODO more general version where they can be reversible
-    % model.lb(ismember(model.rxns, opt.dhRxns)) = 0;
-    % model.rev(ismember(model.rxns, opt.dhRxns)) = 0;
     
     % swap all dh's
     [model, newNames, qsCoupling] = modelSwap(model, opt.dhRxns, true);

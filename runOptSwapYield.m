@@ -4,10 +4,15 @@ function runOptSwapYield(options)
     aerobicString = options.aerobicString;
     swapNum = options.swapNum;
     logFile = options.logFile;
+    if isfield(options, 'dhRxns')
+        dhRxns = options.dhRxns
+    else
+        dhRxns = dhRxnList(30);
+    end
 
     global fileId
     fileId = fopen(logFile, 'a');
-    fprintf(fileId, 'target, aerobic, substrate, thko,swaps\n')
+    fprintf(fileId, 'target\taerobic\tsubstrate\tthko\tswaps\n')
 
     targetRxns = returnTargetRxns();    
     [model,biomassRxn] = setupModel('iJO',substrate,aerobicString,'thko');
@@ -20,18 +25,18 @@ function runOptSwapYield(options)
         opt.biomassRxn = biomassRxn;
         opt.swapNum = swapNum;
         opt.minBiomass = 0.1;
-        opt.dhRxns = dhRxnList(30);
+        opt.dhRxns = dhRxns;
         results = optSwapYield(modelT, opt);
-        myPrint('%s',targetRxns{i});
-        myPrint('%s,', aerobicString);
-        myPrint('%s,', substrate);
-        myPrint('%d,', 1);
-        myPrint('%.4f,', results.f_k);
+        myPrint('%s\t',targetRxns{i});
+        myPrint('%s\t', aerobicString);
+        myPrint('%s\t', substrate);
+        myPrint('%d\t', 1);
+        myPrint('%.4f\t', results.f_k);
         if ~isempty(results.knockoutDhs)
             printReactions(results.knockoutDhs);
         else
             display('no swaps');
-            myPrint(',', []);
+            myPrint('\t', []);
         end
         myPrint('\n',[]);
         % add swaps list
@@ -49,12 +54,10 @@ function printReactions(reactions)
     for j=1:length(reactions)
         myPrint('''%s'';', reactions{j});
     end
-    myPrint(',', []);
+    myPrint('\t', []);
 end
 
 function rxns = returnTargetRxns()
-    rxns = {'EX_val-L(e)'};
-    %{
     rxns =  {'EX_h2s(e)';
              'EX_cys-L(e)';
              'EX_hom-L(e)';
@@ -144,5 +147,4 @@ function rxns = returnTargetRxns()
              'EX_12ppd-R(e)';
              'EX_succ(e)';
              'EX_for(e)';};
-    %}
 end
