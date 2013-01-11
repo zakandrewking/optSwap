@@ -3,12 +3,12 @@ function runAlmaasDistribution
     subs = {'EX_glc(e)';'EX_glc(e)';'EX_xyl-D(e)';'EX_xyl-D(e)'};
     aerString = {'anaerobic','aerobic','anaerobic','aerobic'};
     for i=1:4
-        model = setupModel('iJO','EX_glc(e)',aerString{i},'THKO');
+        model = setupModel('iJO','EX_glc(e)',aerString{i},'noTHKO');
         options.subs = subs{i};
-        options.possibleLoopRxns = {'TRSARr','HPYRRx'};
+        options.possibleLoopRxns = {'TRSARr'};
         % options.autRemLoops = true;
         % options.usePFBA = true;
-        options.dhCount = 17;
+        options.dhCount = 31;
         options.showPlot = false;
         [returnRxns,fluxes] = almaasDistribution(model,options);
         out{i} = [returnRxns, num2cell(fluxes)];

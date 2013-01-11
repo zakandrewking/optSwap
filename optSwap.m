@@ -652,7 +652,7 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
     if (useCobraSolver)
         % maximize
         MILPproblem.c = C;
-        MILPproblem.osense = -1;
+        MILPproblem.osense = -1; % max
         MILPproblem.A = A;
         MILPproblem.b_L = [];
         MILPproblem.b_U = B;
