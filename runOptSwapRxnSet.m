@@ -83,7 +83,7 @@ function runOptSwapRxnSet(opt, reactionSet)
 
     % set options
     options.useCobraSolver = 0;
-    options.knockType = 1; % robustKnock
+    options.knockType = 1;
     options.knockoutNum = knockoutNum;
     % options.knockableRxns = {};
     notSelectedRxns = reducedModel.rxns(~ismember(reducedModel.rxns,selectedRxns));

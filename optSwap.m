@@ -6,8 +6,8 @@ function results = optSwap(model, opt)
 % model
 %
 % OPTIONAL
-% opt - struct with an of the following options:
-%   knockType - 2 run OptSwap; 1 run robustKnock; 0 run OptKnock (broken)
+% opt - struct with any of the following options:
+%   knockType - 2 run OptSwap; 1 run robustKnock
 %   targetRxn - chemical to produce
 %   swapNum - number of swaps (-1 no limit)
 %   knockoutNum - number of knockouts (-1 no limit)
@@ -17,11 +17,11 @@ function results = optSwap(model, opt)
 %   useCobraSolver - 1 use any cobra solver; 0 use tomlab cplex solver
 %   maxW - maximal value of dual variables (higher number will be more
 %          accurate but takes more calculation time)
-%   biomassRxn 
-%   dhRxns - dehydrogenase reaction list
+%   biomassRxn - biomass objective function in the model
+%   dhRxns - oxidoreductase reactions that can be swapped
 %   maxTime - time limit in minutes
-%   printIntermediateSolutions - (unfinished)
-%   intermediateSolutionsFile - (unfinished)
+%   allowDehydrogenaseKnockout - use less than or equal constraint to allow
+%                                dehydrogenase reaction knockouts
 %
 % OUTPUTS
 % results
@@ -60,6 +60,9 @@ function results = optSwap(model, opt)
     if ~isfield(opt, 'intermediateSolutionsFile')
         opt.intermediateSolutionsFile = [];
     end
+    if ~isfield(opt, 'allowDehydrogenaseKnockout')
+        opt.allowDehydrogenaseKnockout = true;
+    end
 
     % name global variables
     global maxTime printIntermediateSolutions
@@ -80,6 +83,7 @@ function results = optSwap(model, opt)
     maxTime = opt.maxTime;
     printIntermediateSolutions = opt.printIntermediateSolutions;
     intermediateSolutionsFile = opt.intermediateSolutionsFile;
+    allowDehydrogenaseKnockout = opt.allowDehydrogenaseKnockout;
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     printLevel = 10;
@@ -107,10 +111,10 @@ function results = optSwap(model, opt)
 
     disp('createRobustOneWayFluxesModel')
     [model, yInd, yCoupledInd, qInd, qCoupledInd, sInd, sCoupledInd,...
-                          notYqsInd, notYqsCoupedInd, m, n, coupled] = ...
-      createRobustOneWayFluxesModel(consModel, chemicalInd, coupledFlag, ...
-                                    knockableRxns, notKnockableRxns, ...
-                                    qsCoupling, useCobraSolver);
+     notYqsInd, notYqsCoupedInd, m, n, coupled] = ...
+        createRobustOneWayFluxesModel(consModel, chemicalInd, coupledFlag, ...
+                                      knockableRxns, notKnockableRxns, ...
+                                      qsCoupling, useCobraSolver);
   
     
     % sizes
@@ -122,7 +126,7 @@ function results = optSwap(model, opt)
     end 
     if printLevel>=3
         display(sprintf('ySize %d, qSize %d, sSize %d',...
-                                      ySize, qSize, sSize)); 
+                        ySize, qSize, sSize)); 
         display(sprintf('yCoupledSize %d, qCoupledSize %d, sCoupledSize %d',...
                         yCoupledSize, qCoupledSize, sCoupledSize)); 
     end 
@@ -248,7 +252,6 @@ function results = optSwap(model, opt)
 
         if (knockType == 0)
             disp('optKnock')
-
 
             results = setupAndRunMILP(Cjoined, Ajoined, Bjoined, ...
                                       lbJoined, ubJoined, IntVars_optKnock, ...
@@ -421,14 +424,14 @@ function results = optSwap(model, opt)
         z1 = [find(Ay1); find(Aq1); find(As1)];
         z2 = [find(Ay2); find(Aq2); find(As2)];
         zSize = size([z1;z2],1);
-        % TODO: where do we use z1, z2?
+        
         if printLevel>=3, disp(sprintf('zSize %d', zSize)); end
         
         yqsCoupledSize = length(yCoupledInd) + length(qCoupledInd) + length(sCoupledInd);
         Ayqs = [
             zeros(2*n+2*(vSize-yqsSize-yqsCoupledSize),yqsSize); 
             -Ay1(yInd,yqsInd);
-            -Ay1(yCoupledInd,yqsInd);      % good!! 
+            -Ay1(yCoupledInd,yqsInd);  
             -Aq1(qInd,yqsInd);
             -Aq1(qCoupledInd,yqsInd);
             -As1(sInd,yqsInd);
@@ -441,24 +444,6 @@ function results = optSwap(model, opt)
             As2(sCoupledInd,yqsInd);
              ];  %flux boundary constraints
          
-%         yqsIndSort = sort(yqsInd);
-%         AyqsSort = [
-%             zeros(2*n+2*(vSize-yqsSize-yqsCoupledSize),yqsSize);
-%             -Ay1(yInd,yqsIndSort);
-%             -Ay1(yCoupledInd,yqsIndSort);      % good!! 
-%             -Aq1(qInd,yqsIndSort);
-%             -Aq1(qCoupledInd,yqsIndSort);
-%             -As1(sInd,yqsIndSort);
-%             -As1(sCoupledInd,yqsIndSort);
-%             Ay2(yInd,yqsIndSort);
-%             Ay2(yCoupledInd,yqsIndSort);     
-%             Aq2(qInd,yqsIndSort);
-%             Aq2(qCoupledInd,yqsIndSort);
-%             As2(sInd,yqsIndSort);
-%             As2(sCoupledInd,yqsIndSort);
-%              ];  %flux boundry constraints
-%          
-%         TODO: check this by writing out a few constraint rows
         
         %so: [A,Ayqs]x<=B;
         B = [
@@ -535,10 +520,7 @@ function results = optSwap(model, opt)
         [A2_w, Ayqs2_w ,B2_w,C2_w, lb2_w, ub2_w, uSize, ~]=...
             separateTransposeJoin(A2, Ayqs2, B2, C2, yqsSize, ...
                                   1,  vSize+wSize+zSize, ...
-                                  maxW,findMaxWFlag, zSizeOptKnock2);
-
-        
-        
+                                  maxW,findMaxWFlag, zSizeOptKnock2); 
         
         %max C2_w*x'
         %s.t
@@ -563,18 +545,24 @@ function results = optSwap(model, opt)
         % swap constraints
             zeros(qSize, uSize + zSizeOptKnock2 + vSize + ySize), ...
                        eye(qSize), sCoupledMatrix;
-            zeros(qSize, uSize + zSizeOptKnock2 + vSize + ySize), ...
-                       -eye(qSize), -sCoupledMatrix;
         %feasibility constraint
             sparse(ARow,uSize+zSizeOptKnock2), A, Ayqs   % 10134       23762
            ];
+        
+        if ~allowDehydrogenaseKnockout
+            A3 = [A3;
+                  zeros(qSize, uSize + zSizeOptKnock2 + vSize + ySize), ...
+                  -eye(qSize), -sCoupledMatrix
+                 ];
+        end
 
         B3=[
             B2_w;
             ones(qSize, 1);
-            -ones(qSize, 1);
             B
            ];
+        
+        if ~allowDehydrogenaseKnockout, B3 = [B3; -ones(qSize, 1)]; end
         
         % add knockout and swap count constraints
         if K >= 0 % knockoutNum
@@ -733,8 +721,9 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
     results.organismObjectiveInd = model.organismObjectiveInd;
     results.chemicalInd = model.chemicalInd;
     results.knockoutRxns = model.rxns(yInd(results.y==0));
-    results.knockoutDhs = model.rxns(qInd(results.q==0));
-    results.knockoutSwaps = model.rxns(sInd(results.s==0));
+    results.knockoutDhs = model.rxns(qInd(results.q==0 & results.s==0));
+    results.knockoutRxns = [results.knockoutRxns; results.knockoutDhs];
+    results.swapRxns = model.rxns(qInd(results.s==1));
     % save('sorted results', 'results');
 end
 

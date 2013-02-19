@@ -4,11 +4,11 @@ function loopOptSwap2
     cleaner = onCleanup(@() cleanup);
     global run status
     status = 'starting';    
-    run = 'best of 4--all targets with new dhlist - glc';
+    run = 'best of 4--13 products--anaerobic aerobic xylose--dh kos ok';
     
     interventionNum = 4;
-    aer = {'anaerobic','aerobic','anaerobic','aerobic'};
-    substrates = {'EX_glc(e)','EX_glc(e)'}; %,'EX_xyl-D(e)','EX_xyl-D(e)'};
+    aer = {'aerobic', 'anaerobic'};;
+    substrates = {'EX_xyl-D(e)','EX_xyl-D(e)'};
     for i=1:2
         status = sprintf('run %d: %d intervention(s)', i, interventionNum);
         opt.knockoutNum = -1;
@@ -33,6 +33,7 @@ function loopOptSwap2
         opt.substrate = substrates{i};
         opt.maxTime = 12*60; %min
         opt.useCobraSolver = true; 
+        opt.allowDehydrogenaseKnockout = true;
         opt.logFile = 'database-2.csv';
         runOptSwap(opt);
     end

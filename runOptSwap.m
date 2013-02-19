@@ -37,6 +37,9 @@ function runOptSwap(opt)
     if ~isfield(opt, 'useCobraSolver'), opt.useCobraSolver = false; end
     if ~isfield(opt, 'canKnockDHs'), opt.canKnockDHs = false; end
     if ~isfield(opt, 'knockType'), opt.knockType = 2; end
+    if ~isfield(opt, 'allowDehydrogenaseKnockout')
+        opt.allowDehydrogenaseKnockout = true; 
+    end
     
     % make variables local
     knockoutNum = opt.knockoutNum;
@@ -56,7 +59,8 @@ function runOptSwap(opt)
     printIntermediateSolutions = opt.printIntermediateSolutions;
     useCobraSolver = opt.useCobraSolver;
     canKnockDHs = opt.canKnockDHs;
-    knockType = opt.knockType
+    knockType = opt.knockType;
+    allowDehydrogenaseKnockout = opt.allowDehydrogenaseKnockout;
 
     % check values
     if ~iscell(targetRxns)
@@ -160,6 +164,7 @@ function runOptSwap(opt)
         options.intermediateSolutionsFile = [experiment '-MILPsols.csv'];
     end
     options.useCobraSolver = useCobraSolver;
+    options.allowDehydrogenaseKnockout = allowDehydrogenaseKnockout;
 
     for i = 1:length(targetRxns)
         myPrint('\n',[]);
@@ -180,8 +185,8 @@ function runOptSwap(opt)
         if ~isempty(knockouts)
             modelT = changeRxnBounds(modelT, knockouts, 0, 'b');
         end
-        if ~isempty(results.knockoutDhs)
-            modelT = modelSwap(modelT, results.knockoutDhs, false);
+        if ~isempty(results.swapRxns)
+            modelT = modelSwap(modelT, results.swapRxns, false);
         end
 
         t = toc(lTic);
@@ -212,8 +217,8 @@ function runOptSwap(opt)
             display('no knockouts');
             myPrint(',', []);
         end
-        if ~isempty(results.knockoutDhs)
-            printReactions(results.knockoutDhs);
+        if ~isempty(results.swapRxns)
+            printReactions(results.swapRxns);
         else
             display('no swaps');
             myPrint(',', []);
