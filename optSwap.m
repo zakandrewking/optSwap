@@ -542,47 +542,50 @@ function results = optSwap(model, opt)
         A3 = [
         %dual constraints
             A2_w, sparse(A2_wRow,ACol), Ayqs2_w;   %  19316       23762
-        % swap constraints
-            zeros(qSize, uSize + zSizeOptKnock2 + vSize + ySize), ...
-                       eye(qSize), sCoupledMatrix;
+        % swap constraint
+            zeros(qSize, uSize + zSizeOptKnock2 + vSize + ySize), eye(qSize), sCoupledMatrix;
         %feasibility constraint
             sparse(ARow,uSize+zSizeOptKnock2), A, Ayqs   % 10134       23762
            ];
-        
-        if ~allowDehydrogenaseKnockout
-            A3 = [A3;
-                  zeros(qSize, uSize + zSizeOptKnock2 + vSize + ySize), ...
-                  -eye(qSize), -sCoupledMatrix
-                 ];
-        end
 
         B3=[
+        % dual constraints
             B2_w;
+        % swap constraint
             ones(qSize, 1);
+        % feasibility constraint
             B
            ];
         
-        if ~allowDehydrogenaseKnockout, B3 = [B3; -ones(qSize, 1)]; end
+        % require swap if property is false
+        if ~allowDehydrogenaseKnockout
+            display('dehydrogenase knockouts not allowed');
+             A3 = [A3;
+                  zeros(qSize, uSize + zSizeOptKnock2 + vSize + ySize), ...
+                  -eye(qSize), -sCoupledMatrix
+                 ];
+             B3 = [B3; -ones(qSize, 1)];
+        end
         
         % add knockout and swap count constraints
         if K >= 0 % knockoutNum
             A3 = [A3; ...
                   zeros(1, uSize + zSizeOptKnock2 + vSize), ...
-                  -ones(1, ySize), ...
-                  zeros(1, qSize + sSize);];
-            B3 = [B3; K - ySize];
+                  -ones(1, ySize + qSize + sSize)
+                 ];
+            B3 = [B3; K - ySize - qSize];
         end
         if L >= 0 % swapNum
             A3 = [A3; ...
                   zeros(1, uSize + zSizeOptKnock2 + vSize + ySize), ...
-                  -ones(1, qSize),...
-                  zeros(1, sSize)];
-            B3 = [B3; L - qSize; ];
+                  zeros(1, qSize),...
+                  ones(1, sSize)];
+            B3 = [B3; L];
         end
         if X >= 0 % interventionNum
             A3 = [A3; ...
                   zeros(1, uSize + zSizeOptKnock2 + vSize), ...
-                  -ones(1, ySize), -ones(1, qSize), ...
+                  -ones(1, ySize + qSize), ...
                   zeros(1, sSize)];
             B3 = [B3; X - ySize - qSize];
         end
