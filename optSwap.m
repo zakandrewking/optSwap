@@ -86,7 +86,7 @@ function results = optSwap(model, opt)
     allowDehydrogenaseKnockout = opt.allowDehydrogenaseKnockout;
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    printLevel = 10;
+    debug = true;
     
     if (knockType == 2)
         % perform swaps
@@ -96,7 +96,7 @@ function results = optSwap(model, opt)
     end
 
     chemicalInd = find(ismember(model.rxns, targetRxn));
-    if printLevel>=3, display(sprintf('chemical index %d', chemicalInd)); end
+    if debug, display(sprintf('chemical index %d', chemicalInd)); end
     
     %parameters
     findMaxWFlag=0;
@@ -124,7 +124,7 @@ function results = optSwap(model, opt)
     if (qSize ~= sSize)
         error('Dehydrogenases do not match swap reactions.');
     end 
-    if printLevel>=3
+    if debug
         display(sprintf('ySize %d, qSize %d, sSize %d',...
                         ySize, qSize, sSize)); 
         display(sprintf('yCoupledSize %d, qCoupledSize %d, sCoupledSize %d',...
@@ -425,7 +425,7 @@ function results = optSwap(model, opt)
         z2 = [find(Ay2); find(Aq2); find(As2)];
         zSize = size([z1;z2],1);
         
-        if printLevel>=3, disp(sprintf('zSize %d', zSize)); end
+        if debug, disp(sprintf('zSize %d', zSize)); end
         
         yqsCoupledSize = length(yCoupledInd) + length(qCoupledInd) + length(sCoupledInd);
         Ayqs = [
@@ -559,18 +559,19 @@ function results = optSwap(model, opt)
         
         % require swap if property is false
         if ~allowDehydrogenaseKnockout
-            display('dehydrogenase knockouts not allowed');
-             A3 = [A3;
+            if debug, display('dehydrogenase knockouts not allowed'); end
+            A3 = [A3;
                   zeros(qSize, uSize + zSizeOptKnock2 + vSize + ySize), ...
                   -eye(qSize), -sCoupledMatrix
                  ];
              B3 = [B3; -ones(qSize, 1)];
         else
-            display('dehydrogenase knockouts are allowed');
+            if debug, display('dehydrogenase knockouts are allowed'); end
         end
         
         % add knockout and swap count constraints
         if K >= 0 % knockoutNum
+            if debug, fprintf('using K=%d knockoutNum constraint\n',K); end
             A3 = [A3; ...
                   zeros(1, uSize + zSizeOptKnock2 + vSize), ...
                   -ones(1, ySize + qSize + sSize)
@@ -578,6 +579,7 @@ function results = optSwap(model, opt)
             B3 = [B3; K - ySize - qSize];
         end
         if L >= 0 % swapNum
+            if debug, fprintf('using L=%d swapNum constraint\n',L); end
             A3 = [A3; ...
                   zeros(1, uSize + zSizeOptKnock2 + vSize + ySize), ...
                   zeros(1, qSize),...
@@ -585,6 +587,7 @@ function results = optSwap(model, opt)
             B3 = [B3; L];
         end
         if X >= 0 % interventionNum
+            if debug, fprintf('using X=%d interventionNum constraint\n',X); end
             A3 = [A3; ...
                   zeros(1, uSize + zSizeOptKnock2 + vSize), ...
                   -ones(1, ySize + qSize), ...
@@ -618,6 +621,8 @@ function results = optSwap(model, opt)
                                   coupledFlag, coupled);
     end
 end
+
+
 
 function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
                                    model, yInd, qInd, sInd, K, L, ...
@@ -673,7 +678,7 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
         results.chemical = -Result_cobra.obj;
         results.f_k = Result_cobra.obj;
         results.solver = Result_cobra.solver;
-        save results
+        if debug, save('raw results','results'); end
     else
         % minimize
         Prob_OptKnock2=mipAssign(-C, A, [], B, lb, ub, [], 'part 3 MILP', ...
@@ -696,10 +701,10 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
         end
         
         disp('tomRun') 
-        warning('hack to show script hierarchy')
+        if debug, warning('hack to show script hierarchy'); end
         Result_tomRun = tomRun('cplex', Prob_OptKnock2, 10);
 
-        save('raw results','Result_tomRun');
+        if debug, save('raw results','Result_tomRun'); end
 
         results.raw = Result_tomRun; 
         results.y = Result_tomRun.x_k(intVars(1:ySize));
@@ -729,7 +734,9 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
     results.knockoutDhs = model.rxns(qInd(results.q==0 & results.s==0));
     results.knockoutRxns = [results.knockoutRxns; results.knockoutDhs];
     results.swapRxns = model.rxns(qInd(results.s==1));
-    % save('sorted results', 'results');
+    if debug
+        save('sorted results', 'results');
+    end
 end
 
 
