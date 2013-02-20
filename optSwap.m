@@ -565,6 +565,8 @@ function results = optSwap(model, opt)
                   -eye(qSize), -sCoupledMatrix
                  ];
              B3 = [B3; -ones(qSize, 1)];
+        else
+            display('dehydrogenase knockouts are allowed');
         end
         
         % add knockout and swap count constraints
