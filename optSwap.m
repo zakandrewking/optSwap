@@ -66,7 +66,7 @@ function results = optSwap(model, opt)
 
     % name global variables
     global maxTime printIntermediateSolutions
-    global intermediateSolutionsFile useCobraSolver
+    global intermediateSolutionsFile useCobraSolver de
     
     % set local variables
     knockType = opt.knockType;
@@ -646,7 +646,7 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
 
     %solving mip
     disp('set up MILP')
-    global useCobraSolver
+    global useCobraSolver debugFlag
     if (useCobraSolver)
         % maximize
         MILPproblem.c = C;
