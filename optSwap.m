@@ -742,11 +742,7 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
     results.knockoutDhs = model.rxns(qInd(results.q==0 & s_to_q==0));
     results.knockoutRxns = [results.knockoutRxns; results.knockoutDhs];
     results.swapRxns = model.rxns(qInd(s_to_q==1));
-<<<<<<< HEAD
     if debugFlag
-=======
-    if debug
->>>>>>> 59d965c7165b1250f430923dc4ebc5e53bfccbd7
         save('sorted results', 'results');
     end
 end
