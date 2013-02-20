@@ -730,10 +730,18 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
     results.sInd = sInd;
     results.organismObjectiveInd = model.organismObjectiveInd;
     results.chemicalInd = model.chemicalInd;
+    
+    results.qsCoupling = qsCoupling; 
+    u = qsCoupling(:,1);
+    v = qsCoupling(:,2);
+    for i=1:size(qsCoupling,1)
+        s_to_q(i,1) = results.s(ismember(sInd,v(ismember(u,qInd(i)))));
+    end
+    
     results.knockoutRxns = model.rxns(yInd(results.y==0));
-    results.knockoutDhs = model.rxns(qInd(results.q==0 & results.s==0));
+    results.knockoutDhs = model.rxns(qInd(results.q==0 & s_to_q==0));
     results.knockoutRxns = [results.knockoutRxns; results.knockoutDhs];
-    results.swapRxns = model.rxns(qInd(results.s==1));
+    results.swapRxns = model.rxns(qInd(s_to_q==1));
     if debug
         save('sorted results', 'results');
     end
