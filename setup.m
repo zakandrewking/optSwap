@@ -1,0 +1,2 @@
+addpath helper/
+setupCobraSolver
