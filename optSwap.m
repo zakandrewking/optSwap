@@ -256,7 +256,7 @@ function results = optSwap(model, opt)
             results = setupAndRunMILP(Cjoined, Ajoined, Bjoined, ...
                                       lbJoined, ubJoined, IntVars_optKnock, ...
                                       model, yInd, [], [], K, [], ...
-                                      coupledFlag, coupled);
+                                      []);
 
         elseif (knockType == 1)
             disp('robustKnock')
@@ -341,7 +341,7 @@ function results = optSwap(model, opt)
 
             results = setupAndRunMILP(C3, A3, B3, lb3, ub3, intVars,...
                                       model, yInd, [], [], K, [], ...
-                                      coupledFlag, coupled); 
+                                      []); 
         end
         
     elseif (knockType == 2) 
@@ -618,7 +618,7 @@ function results = optSwap(model, opt)
         
         results = setupAndRunMILP(C3, A3, B3, lb3, ub3, intVars, ...
                                   model, yInd, qInd, sInd, K, L, ...
-                                  coupledFlag, coupled);
+                                  qsCoupling);
     end
 end
 
@@ -626,7 +626,7 @@ end
 
 function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
                                    model, yInd, qInd, sInd, K, L, ...
-                                   coupledFlag, coupled);
+                                   qsCoupling);
 
     global maxTime
     global printIntermediateSolutions intermediateSolutionsFile
@@ -731,17 +731,19 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
     results.organismObjectiveInd = model.organismObjectiveInd;
     results.chemicalInd = model.chemicalInd;
     
-    results.qsCoupling = qsCoupling; 
-    u = qsCoupling(:,1);
-    v = qsCoupling(:,2);
-    for i=1:size(qsCoupling,1)
-        s_to_q(i,1) = results.s(ismember(sInd,v(ismember(u,qInd(i)))));
-    end
-    
     results.knockoutRxns = model.rxns(yInd(results.y==0));
-    results.knockoutDhs = model.rxns(qInd(results.q==0 & s_to_q==0));
-    results.knockoutRxns = [results.knockoutRxns; results.knockoutDhs];
-    results.swapRxns = model.rxns(qInd(s_to_q==1));
+
+    results.qsCoupling = qsCoupling; 
+    if ~isempty(qsCoupling)
+        u = qsCoupling(:,1);
+        v = qsCoupling(:,2);
+        for i=1:size(qsCoupling,1)
+            s_to_q(i,1) = results.s(ismember(sInd,v(ismember(u,qInd(i)))));
+        end 
+        results.knockoutDhs = model.rxns(qInd(results.q==0 & s_to_q==0));
+        results.knockoutRxns = [results.knockoutRxns; results.knockoutDhs];
+        results.swapRxns = model.rxns(qInd(s_to_q==1));
+    end
     if debugFlag
         save('sorted results', 'results');
     end
