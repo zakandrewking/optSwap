@@ -1,10 +1,10 @@
-function loopOptSwapTest
+function loopOptSwapTest2
 
 % setup Cleaner
     cleaner = onCleanup(@() cleanup);
     global run status
     status = 'starting';    
-    run = 'test-dh-ko-2-kos-formate';
+    run = 'test-no-dh-ko-2-kos-formate';
     
     interventionNum = 2;
     aer = {'anaerobic'};
@@ -32,8 +32,8 @@ function loopOptSwapTest
         opt.aerobicString = aer{i};
         opt.substrate = substrates{i};
         opt.maxTime = 12*60; %min
-        opt.useCobraSolver = false; 
-        opt.allowDehydrogenaseKnockout = true;
+        opt.useCobraSolver = true; 
+        opt.allowDehydrogenaseKnockout = false;
         opt.logFile = 'database-0.csv';
         runOptSwap(opt);
     end
