@@ -77,6 +77,7 @@ function results = optSwap(model, opt)
     knockableRxns = opt.knockableRxns;
     notKnockableRxns = opt.notKnockableRxns;
     useCobraSolver = opt.useCobraSolver;
+    if useCobraSolver, error('Cobra solver code still not functional'); end
     maxW = opt.maxW;
     biomassRxn = opt.biomassRxn;
     dhRxns = opt.dhRxns;
