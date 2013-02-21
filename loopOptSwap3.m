@@ -32,7 +32,7 @@ function loopOptSwap3
         opt.aerobicString = aer{i};
         opt.substrate = substrates{i};
         opt.maxTime = 12*60; %min
-        opt.useCobraSolver = true; 
+        opt.useCobraSolver = false; 
         opt.logFile = 'database-3.csv';
         runOptSwap(opt);
     end
