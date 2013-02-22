@@ -66,7 +66,7 @@ function results = optSwap(model, opt)
 
     % name global variables
     global maxTime printIntermediateSolutions
-    global intermediateSolutionsFile useCobraSolver de
+    global intermediateSolutionsFile useCobraSolver debugFlag
     
     % set local variables
     knockType = opt.knockType;
@@ -88,6 +88,7 @@ function results = optSwap(model, opt)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     debugFlag = true;
+    testDebugFlag();
     
     if (knockType == 2)
         % perform swaps
@@ -784,4 +785,13 @@ function consModel=prepareOptSwapModel(model, chemicalInd, biomassRxn)
     consModel.S(sel1)=0;
     consModel.S(sel2)=0;
 
+end
+
+function testDebugFlag()
+    global debugFlag
+    if debugFlag
+        display('debug flag = true');
+    else
+        display('debug flag = false');
+    end
 end
