@@ -257,8 +257,8 @@ function results = optSwap(model, opt)
 
             results = setupAndRunMILP(Cjoined, Ajoined, Bjoined, ...
                                       lbJoined, ubJoined, IntVars_optKnock, ...
-                                      model, yInd, [], [], K, [], ...
-                                      []);
+                                      model, yInd, [], [], K, [], [], ...
+                                      [], []);
 
         elseif (knockType == 1)
             disp('robustKnock')
@@ -342,8 +342,8 @@ function results = optSwap(model, opt)
             intVars=A2_wCol+ACol+1:A2_wCol+ACol+ySize;
 
             results = setupAndRunMILP(C3, A3, B3, lb3, ub3, intVars,...
-                                      model, yInd, [], [], K, [], ...
-                                      []); 
+                                      model, yInd, [], [], K, [], [], ...
+                                      [], []); 
         end
         
     elseif (knockType == 2) 
@@ -619,16 +619,16 @@ function results = optSwap(model, opt)
         intVars = (A2_wCol + ACol + 1):(A2_wCol + ACol + yqsSize);
         
         results = setupAndRunMILP(C3, A3, B3, lb3, ub3, intVars, ...
-                                  model, yInd, qInd, sInd, K, L, ...
-                                  qsCoupling);
+                                  model, yInd, qInd, sInd, K, L, X, ...
+                                  coupled, qsCoupling);
     end
 end
 
 
 
 function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
-                                   model, yInd, qInd, sInd, K, L, ...
-                                   qsCoupling);
+                                   model, yInd, qInd, sInd, K, L, X, ...
+                                   coupled, qsCoupling);
 
     global maxTime
     global printIntermediateSolutions intermediateSolutionsFile
@@ -719,6 +719,7 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
         results.solver = 'tomlab_cplex';
     end
     
+    results.model = model;
     results.C = C;
     results.A = A;
     results.B = B;
@@ -726,6 +727,7 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
     results.ub = ub;
     results.K = K;
     results.L = L; 
+    results.X = X;
     results.intVars = intVars;
     results.yInd = yInd;
     results.qInd = qInd;
@@ -735,7 +737,9 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
     
     results.knockoutRxns = model.rxns(yInd(results.y==0));
 
+    results.coupled = coupled;
     results.qsCoupling = qsCoupling; 
+    
     if ~isempty(qsCoupling)
         u = qsCoupling(:,1);
         v = qsCoupling(:,2);
