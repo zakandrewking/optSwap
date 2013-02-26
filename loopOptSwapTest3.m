@@ -1,14 +1,14 @@
-function loopOptSwapTest
+function loopOptSwapTest3
 
 % setup Cleaner
     cleaner = onCleanup(@() cleanup);
     global run status
     status = 'starting';    
-    run = 'test-dh-ko-3-kos-formate';
+    run = 'test-dh-ko-2-kos-formate';
     
-    interventionNum = 3;
-    aer = {'aerobic'};
-    substrates = {'EX_xyl-D(e)','EX_glc(e)'};
+    interventionNum = 2;
+    aer = {'anaerobic'};
+    substrates = {'EX_glc(e)','EX_glc(e)'};
     for i=1:1
         status = sprintf('run %d: %d intervention(s)', i, interventionNum);
         opt.knockoutNum = -1;
