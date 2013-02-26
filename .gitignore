@@ -1,1 +1,7 @@
 .DS_Store
+*.csv
+*.txt
+*.mat
+*~
+*.csv
+*.txt
