@@ -4,7 +4,7 @@ function loopOptSwapTest
     cleaner = onCleanup(@() cleanup);
     global run status
     status = 'starting';    
-    run = 'test-master-3-kos-formate-d8605';
+    run = 'test-master-3-kos-formate-759d8';
     
     interventionNum = 3;
     aer = {'aerobic'};
