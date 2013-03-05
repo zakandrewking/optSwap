@@ -4,7 +4,6 @@ function results = optSwapYield(model, opt)
 %
 % INPUTS
 % model
-% dhRxns
 %
 % OPTIONAL
 % opt - struct with an of the following options:
