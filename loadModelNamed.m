@@ -17,6 +17,8 @@ function model = loadModelNamed(modelName)
         addRxns = true;
     elseif strcmp(modelName,'iND750')
         modelName = 'Sc_iND750_flux1';
+    elseif strcmp(modelName,'iJO-h')
+        modelName = 'iJO1366-heterogenous-pathways';
     end
 
 
