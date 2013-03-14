@@ -14,3 +14,10 @@ accurate but takes more calculation time)
 optKnockFlag - indicates if optKnock will be calculated 
 robustKnockFlag - indicates if optKnock will be calculated 
 fixedGlu - size of fixed glucose reaction
+
+Dependencies
+=========
+
+Requires matlab-startup helper files:
+
+https://github.com/zakandrewking/matlab-startup
