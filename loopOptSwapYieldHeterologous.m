@@ -1,14 +1,14 @@
-function loopOptSwapYield
+function loopOptSwapYieldHeterologous
         
     cleaner = onCleanup(@() cleanup);
     global run status
     status = 'starting';
     run = 'optSwapYield';
-    logFile = sprintf('optSwapYield-Native_%s.tsv', ...
+    logFile = sprintf('optSwapYield-Heterologous_%s.tsv', ...
                       datestr(now, 'yy-mm-dd_HH_MM_SS'));
     global fileId
     fileId = fopen(logFile, 'a');
-    fprintf(fileId, ['target\taerobic\tsubstrate\tnum swaps\tthko\' ...
+    fprintf(fileId, ['target\tsubsystem\taerobic\tsubstrate\tnum swaps\tthko\' ...
                      'tf_k\tmax yield\tswaps\ttime (s)\n']);
     fclose(fileId);
     
@@ -27,7 +27,7 @@ function loopOptSwapYield
                 opt.aerobicString = aer{j};
                 opt.swapNum = swaps(k);
                 opt.logFile = logFile;
-                runOptSwapYield(opt);
+                runOptSwapYieldHeterologous(opt);
             end
         end
     end

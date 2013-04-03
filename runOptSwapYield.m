@@ -12,28 +12,44 @@ function runOptSwapYield(options)
 
     global fileId
     fileId = fopen(logFile, 'a');
-    fprintf(fileId, 'target\taerobic\tsubstrate\tthko\tf_k\tswaps\ttime (s)\n')
 
     targetRxns = returnTargetRxns();    
     [model,biomassRxn] = setupModel('iJO',substrate,aerobicString,'thko');
     for i=1:length(targetRxns)
         lTic = tic;
-        modelT = model;
-        opt.targetRxn = targetRxns{i};
-        modelT = setupModelForTarget(modelT, opt.targetRxn);
         opt.useCobraSolver = true;
         opt.biomassRxn = biomassRxn;
         opt.swapNum = swapNum;
         opt.minBiomass = 0.1;
         opt.dhRxns = dhRxns;
-        results = optSwapYield(modelT, opt);
+        opt.targetRxn = targetRxns{i};
+        
+        modelT = model;
+        modelT = setupModelForTarget(modelT, opt.targetRxn);
+        
+        if opt.swapNum==0
+            f_k = '';
+            knockoutDhs = {};
+        else
+            results = optSwapYield(modelT, opt);
+            f_k = sprintf('%.4f', results.f_k);
+            knockoutDhs = results.knockoutDhs;
+        end
+        
+        modelT = modelSwap(modelT, knockoutDhs, false);
+        modelT = changeObjective(modelT, opt.targetRxn);
+        modelT = changeRxnBounds(modelT, biomassRxn, 0.1, 'l');
+        soln = optimizeCbModel(modelT);
+        
         myPrint('%s\t',targetRxns{i});
         myPrint('%s\t', aerobicString);
         myPrint('%s\t', substrate);
-        myPrint('%d\t', 1);
-        myPrint('%.4f\t', results.f_k);
-        if ~isempty(results.knockoutDhs)
-            printReactions(results.knockoutDhs);
+        myPrint('%d\t', swapNum);
+        myPrint('%s\t', thko);
+        myPrint('%s\t', f_k);
+        myPrint('%.4f\t', soln.f);
+        if ~isempty(knockoutDhs)
+            printReactions(knockoutDhs);
         else
             display('no swaps');
             myPrint('\t', []);
@@ -41,7 +57,6 @@ function runOptSwapYield(options)
         t = toc(lTic);
         myPrint('%.1f', t);
         myPrint('\n',[]);
-        % add swaps list
     end
     fclose(fileId);
 end
