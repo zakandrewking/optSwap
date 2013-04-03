@@ -4,6 +4,7 @@ function runOptSwapYield(options)
     aerobicString = options.aerobicString;
     swapNum = options.swapNum;
     logFile = options.logFile;
+    thko = options.thko;
     if isfield(options, 'dhRxns')
         dhRxns = options.dhRxns;
     else
@@ -14,7 +15,7 @@ function runOptSwapYield(options)
     fileId = fopen(logFile, 'a');
 
     targetRxns = returnTargetRxns();    
-    [model,biomassRxn] = setupModel('iJO',substrate,aerobicString,'thko');
+    [model,biomassRxn] = setupModel('iJO',substrate,aerobicString,thko);
     for i=1:length(targetRxns)
         lTic = tic;
         opt.useCobraSolver = true;
