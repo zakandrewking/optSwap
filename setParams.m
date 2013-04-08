@@ -50,5 +50,6 @@ function [newProb,solverParams] = setParams(prob, cobraSolverFlag, maxTime)
             NUMERICALEMPHASIS;
         newProb.MIP.cpxControl.SCAIND=1;
         newProb.MIP.cpxControl.TILIM=timeLimit;
+        newProb.CPLEX.LogFile = 'cplex-log.txt';
     end
 end
