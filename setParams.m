@@ -6,7 +6,7 @@ function [newProb,solverParams] = setParams(prob, cobraSolverFlag, maxTime)
     if (nargin < 2 || isempty(cobraSolverFlag)), cobraSolverFlag = false; end
     if (nargin < 3 || isempty(maxTime)), maxTime = 24*60; end
 
-    intTol = 10e-9;
+    intTol = 10e-12;
     relMipGapTol = 1e-6;
     timeLimit = maxTime * 60; %seconds
     logFile = 'log.txt';

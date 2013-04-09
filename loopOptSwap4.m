@@ -4,11 +4,11 @@ function loopOptSwap4
     cleaner = onCleanup(@() cleanup);
     global run status
     status = 'starting';    
-    run = 'best of 1--all targets with new dhlist - glc';
+    run = 'best of 4--13 products--anaerobic aerobic xylose--dh kos ok--intTol1e-12';
     
-    interventionNum = 1;
-    aer = {'anaerobic','aerobic','anaerobic','aerobic'};
-    substrates = {'EX_glc(e)','EX_glc(e)'};
+    interventionNum = 4;
+    aer = {'anaerobic', 'aerobic'};
+    substrates = {'EX_xyl-D(e)', 'EX_xyl-D(e)'};
     for i=1:2
         status = sprintf('run %d: %d intervention(s)', i, interventionNum);
         opt.knockoutNum = -1;
