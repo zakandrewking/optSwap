@@ -19,7 +19,7 @@ function results = optSwap(model, opt)
 %          accurate but takes more calculation time)
 %   biomassRxn - biomass objective function in the model
 %   dhRxns - oxidoreductase reactions that can be swapped
-%   maxTime - time limit in minutes
+%   solverParams.maxTime - time limit in minutes
 %   allowDehydrogenaseKnockout - use less than or equal constraint to allow
 %                                dehydrogenase reaction knockouts
 %
@@ -53,7 +53,7 @@ function results = optSwap(model, opt)
         opt.biomassRxn = model.rxns(model.c~=0);
     end
     if ~isfield(opt,'dhRxns'), opt.dhRxns = {}; end
-    if ~isfield(opt, 'maxTime'), opt.maxTime = []; end
+    if ~isfield(opt, 'solverParams'), opt.solverParams = []; end
     if ~isfield(opt, 'printIntermediateSolutions')
         opt.printIntermediateSolutions = false;
     end
@@ -65,7 +65,7 @@ function results = optSwap(model, opt)
     end
 
     % name global variables
-    global maxTime printIntermediateSolutions
+    global solverParams printIntermediateSolutions
     global intermediateSolutionsFile useCobraSolver debugFlag
     
     % set local variables
@@ -81,7 +81,7 @@ function results = optSwap(model, opt)
     maxW = opt.maxW;
     biomassRxn = opt.biomassRxn;
     dhRxns = opt.dhRxns;
-    maxTime = opt.maxTime;
+    solverParams = opt.solverParams;
     printIntermediateSolutions = opt.printIntermediateSolutions;
     intermediateSolutionsFile = opt.intermediateSolutionsFile;
     allowDehydrogenaseKnockout = opt.allowDehydrogenaseKnockout;
@@ -630,7 +630,7 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
                                    model, yInd, qInd, sInd, K, L, X, ...
                                    coupled, qsCoupling);
 
-    global maxTime
+    global solverParams
     global printIntermediateSolutions intermediateSolutionsFile
     %solve milp
     %parameter for mip assign
@@ -667,7 +667,7 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
             disp('setting up callback')
             warning('not finished')
         end
-        [MILPproblem, solverParams] = setParams(MILPproblem, true, maxTime); 
+        [MILPproblem, solverParams] = setParams(MILPproblem, true, solverParams); 
         disp('Run COBRA MILP')
         Result_cobra = solveCobraMILP(MILPproblem,solverParams);
 
@@ -688,7 +688,7 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
                                  intVars, VarWeight, KNAPSACK, fIP, xIP, ...
                                  f_Low, x_min, x_max, f_opt, x_opt);
         disp('setParams')
-        Prob_OptKnock2 = setParams(Prob_OptKnock2, false, maxTime);
+        Prob_OptKnock2 = setParams(Prob_OptKnock2, false, solverParams);
 
         if printIntermediateSolutions
             disp('setting up callback')
