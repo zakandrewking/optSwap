@@ -15,6 +15,7 @@ function [newProb,solverParams] = setParams(prob, cobraSolverFlag, nonDefaultPar
     absMipGapTol = 1e-8;
     EPRHS = 1e-9;
     maxTime = 12*60*60; % seconds
+    THREADS = 10;
     
     if isfield(nonDefaultParameters, 'maxTime')
         maxTime = nonDefaultParameters.maxTime;
@@ -27,6 +28,10 @@ function [newProb,solverParams] = setParams(prob, cobraSolverFlag, nonDefaultPar
     if isfield(nonDefaultParameters, 'EPRHS')
         EPRHS = nonDefaultParameters.EPRHS;
         fprintf('EPRHS: %.1e\n', EPRHS);
+    end
+    if isfield(nonDefaultParameters, 'THREADS')
+        THREADS = nonDefaultParameters.THREADS;
+        fprintf('THREADS: %d\n', THREADS);
     end
     if cobraSolverFlag
         newProb = prob;
@@ -63,6 +68,7 @@ function [newProb,solverParams] = setParams(prob, cobraSolverFlag, nonDefaultPar
         newProb.MIP.cpxControl.SCAIND=1;
         newProb.MIP.cpxControl.TILIM=maxTime;
         newProb.MIP.cpxControl.EPRHS = EPRHS;
+        newProb.MIP.cpxControl.THREADS = THREADS;
         newProb.CPLEX.LogFile = 'cplex-log.txt';
     end
 end
