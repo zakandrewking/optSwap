@@ -4,36 +4,37 @@ function loopOptSwap1
     cleaner = onCleanup(@() cleanup);
     global run status
     status = 'starting';    
-    run = 'best of 1--ethanol test';
     
-    interventionNum = 1;
-    aer = {'aerobic', 'anaerobic'};;
-    substrates = {'EX_glc(e)','EX_glc(e)'};
-    for i=1:1
-        status = sprintf('run %d: %d intervention(s)', i, interventionNum);
+    runs = {
+        {4},{'EX_for(e)'},{'anaerobic'},{'EX_glc(e)'};
+        {4},{'EX_akg(e)'},{'anaerobic'},{'EX_glc(e)'};
+        {4},{'EX_for(e)'},{'anaerobic'},{'EX_xyl-D(e)'};
+        {4},{'EX_succ(e)'},{'anaerobic'},{'EX_xyl-D(e)'};
+        {4},{'EX_akg(e)'},{'anaerobic'},{'EX_xyl-D(e)'};
+        {4},{'EX_etoh(e)'},{'aerobic'},{'EX_glc(e)'};
+        {4},{'EX_for(e)'},{'aerobic'},{'EX_glc(e)'};
+        {4},{'EX_succ(e)'},{'aerobic'},{'EX_glc(e)'};
+        {4},{'EX_ac(e)'},{'aerobic'},{'EX_glc(e)'};
+        {4},{'EX_lac-D(e)'},{'aerobic'},{'EX_glc(e)'};
+        {4},{'EX_etoh(e)'},{'anaerobic'},{'EX_xyl-D(e)'};
+        {4},{'EX_for(e)'},{'aerobic'},{'EX_glc(e)'}
+           };
+    run = 'rerunning best of 4s'
+   
+    for i=1:4
+        status = sprintf('run %d', i);
         opt.knockoutNum = -1;
         opt.swapNum = -1;
-        opt.interventionNum = interventionNum;
-        opt.targetRxns = {'EX_etoh(e)';
-                          % 'EX_for(e)';
-                          % 'EX_succ(e)';
-                          % 'EX_ac(e)';
-                          % 'EX_lac-D(e)';
-                          % 'EX_akg(e)';
-                          % 'EX_ala-L(e)';
-                          % 'EX_glyc(e)';
-                          % 'EX_ser-L(e)';
-                          % 'EX_pyr(e)';
-                          % 'EX_fum(e)';
-                          % 'EX_mal-L(e)';
-                          % 'EX_glu-L(e)';
-                         };
+        opt.interventionNum = runs{i,1}{1};
+        opt.targetRxns = runs{i,2};
         opt.experiment = run;
-        opt.aerobicString = aer{i};
-        opt.substrate = substrates{i};
+        opt.aerobicString = runs{i,3}{1};
+        opt.substrate = runs{i,4}{1};
         opt.solverParams.maxTime = 12*60*60; %sec
         opt.solverParams.intTol = 1e-09; %sec
-        opt.solverParams.EPRHS = 1e-07; %sec
+        opt.solverParams.EPRHS = 1e-09; 
+        opt.solverParams.PROBE = 3;
+        opt.solverParams.THREADS = 20;
         opt.useCobraSolver = false; 
         opt.allowDehydrogenaseKnockout = true;
         opt.logFile = 'database-1.csv';
