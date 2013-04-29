@@ -211,7 +211,8 @@ function results = optSwap(model, opt)
         %min -C*v
         %s.t
         %-[A,Ay]*[v;y]>=-B
-        disp('separateTransposeJoin')
+
+        % This function is termed /dual_embed/ in the RobustKnock and OptSwap papers
         [A_w, Ay_w ,B_w,C_w, lb_w, ub_w, wSize, wZs] = ...
             separateTransposeJoin(-A, -Ay,-B,-C,ySize, 1,  m, maxW,findMaxWFlag, zSize);
         %max C_w(w  z)'

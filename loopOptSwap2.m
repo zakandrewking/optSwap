@@ -4,23 +4,23 @@ function loopOptSwap2
     cleaner = onCleanup(@() cleanup);
     global run status
     status = 'starting';    
-    run = 'best of 4--13 products--anaerobic aerobic glucose--dh kos ok';
+    run = 'best of 1--13 products--anaerobic aerobic glucose--dh kos ok';
     
-    interventionNum = 4;
+    interventionNum = 1;
     aer = {'anaerobic', 'aerobic'};
     substrates = {'EX_glc(e)', 'EX_glc(e)'};
-    for i=2:2
+    for i=1:2
         status = sprintf('run %d', i);
         opt.knockoutNum = -1;
         opt.swapNum = -1;
         opt.interventionNum = interventionNum;
-        opt.targetRxns = {% 'EX_etoh(e)';
-                          % 'EX_for(e)';
-                          % 'EX_succ(e)';
-                          % 'EX_ac(e)';
-                          % 'EX_lac-D(e)';
+        opt.targetRxns = {'EX_etoh(e)';
+                          'EX_for(e)';
+                          'EX_succ(e)';
+                          'EX_ac(e)';
+                          'EX_lac-D(e)';
                           'EX_akg(e)';
-                          % 'EX_ala-L(e)';
+                          'EX_ala-L(e)';
                           'EX_glyc(e)';
                           'EX_ser-L(e)';
                           'EX_pyr(e)';
@@ -28,9 +28,6 @@ function loopOptSwap2
                           'EX_mal-L(e)';
                           'EX_glu-L(e)';
                          };
-        if i==2
-            opt.targetRxns = [opt.targetRxns; {'EX_ala-L(e)'}];
-        end
         opt.experiment = run;
         opt.aerobicString = aer{i};
         opt.substrate = substrates{i};
