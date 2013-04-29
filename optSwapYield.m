@@ -4,6 +4,7 @@ function results = optSwapYield(model, opt)
 %
 % INPUTS
 % model
+% dhRxns
 %
 % OPTIONAL
 % opt - struct with an of the following options:
@@ -226,13 +227,8 @@ function results = optSwapYield(model, opt)
         Result_cobra = solveCobraMILP(MILPproblem,solverParams);
         
         results.raw = Result_cobra;
-        try
-            results.q = Result_cobra.full(intVars(1:qSize));
-            results.s = Result_cobra.full(intVars(qSize+1:qSize+sSize));
-        catch
-            results.q = [];
-            results.s = [];
-        end
+        results.q = Result_cobra.full(intVars(1:qSize));
+        results.s = Result_cobra.full(intVars(qSize+1:qSize+sSize));
         results.exitFlag = Result_cobra.stat;
         results.inform = Result_cobra.origStat;
         results.f_k = Result_cobra.obj;

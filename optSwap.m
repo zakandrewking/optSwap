@@ -19,7 +19,7 @@ function results = optSwap(model, opt)
 %          accurate but takes more calculation time)
 %   biomassRxn - biomass objective function in the model
 %   dhRxns - oxidoreductase reactions that can be swapped
-%   maxTime - time limit in minutes
+%   solverParams.maxTime - time limit in minutes
 %   allowDehydrogenaseKnockout - use less than or equal constraint to allow
 %                                dehydrogenase reaction knockouts
 %
@@ -53,7 +53,7 @@ function results = optSwap(model, opt)
         opt.biomassRxn = model.rxns(model.c~=0);
     end
     if ~isfield(opt,'dhRxns'), opt.dhRxns = {}; end
-    if ~isfield(opt, 'maxTime'), opt.maxTime = []; end
+    if ~isfield(opt, 'solverParams'), opt.solverParams = []; end
     if ~isfield(opt, 'printIntermediateSolutions')
         opt.printIntermediateSolutions = false;
     end
@@ -65,8 +65,8 @@ function results = optSwap(model, opt)
     end
 
     % name global variables
-    global maxTime printIntermediateSolutions
-    global intermediateSolutionsFile useCobraSolver
+    global solverParams printIntermediateSolutions
+    global intermediateSolutionsFile useCobraSolver debugFlag
     
     % set local variables
     knockType = opt.knockType;
@@ -81,13 +81,14 @@ function results = optSwap(model, opt)
     maxW = opt.maxW;
     biomassRxn = opt.biomassRxn;
     dhRxns = opt.dhRxns;
-    maxTime = opt.maxTime;
+    solverParams = opt.solverParams;
     printIntermediateSolutions = opt.printIntermediateSolutions;
     intermediateSolutionsFile = opt.intermediateSolutionsFile;
     allowDehydrogenaseKnockout = opt.allowDehydrogenaseKnockout;
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    printLevel = 10;
+    debugFlag = true;
+    testDebugFlag();
     
     if (knockType == 2)
         % perform swaps
@@ -97,7 +98,7 @@ function results = optSwap(model, opt)
     end
 
     chemicalInd = find(ismember(model.rxns, targetRxn));
-    if printLevel>=3, display(sprintf('chemical index %d', chemicalInd)); end
+    if debugFlag, display(sprintf('chemical index %d', chemicalInd)); end
     
     %parameters
     findMaxWFlag=0;
@@ -125,7 +126,7 @@ function results = optSwap(model, opt)
     if (qSize ~= sSize)
         error('Dehydrogenases do not match swap reactions.');
     end 
-    if printLevel>=3
+    if debugFlag
         display(sprintf('ySize %d, qSize %d, sSize %d',...
                         ySize, qSize, sSize)); 
         display(sprintf('yCoupledSize %d, qCoupledSize %d, sCoupledSize %d',...
@@ -210,7 +211,8 @@ function results = optSwap(model, opt)
         %min -C*v
         %s.t
         %-[A,Ay]*[v;y]>=-B
-        disp('separateTransposeJoin')
+
+        % This function is termed /dual_embed/ in the RobustKnock and OptSwap papers
         [A_w, Ay_w ,B_w,C_w, lb_w, ub_w, wSize, wZs] = ...
             separateTransposeJoin(-A, -Ay,-B,-C,ySize, 1,  m, maxW,findMaxWFlag, zSize);
         %max C_w(w  z)'
@@ -256,8 +258,8 @@ function results = optSwap(model, opt)
 
             results = setupAndRunMILP(Cjoined, Ajoined, Bjoined, ...
                                       lbJoined, ubJoined, IntVars_optKnock, ...
-                                      model, yInd, [], [], K, [], ...
-                                      coupledFlag, coupled);
+                                      model, yInd, [], [], K, [], [], ...
+                                      [], []);
 
         elseif (knockType == 1)
             disp('robustKnock')
@@ -341,8 +343,8 @@ function results = optSwap(model, opt)
             intVars=A2_wCol+ACol+1:A2_wCol+ACol+ySize;
 
             results = setupAndRunMILP(C3, A3, B3, lb3, ub3, intVars,...
-                                      model, yInd, [], [], K, [], ...
-                                      coupledFlag, coupled); 
+                                      model, yInd, [], [], K, [], [], ...
+                                      [], []); 
         end
         
     elseif (knockType == 2) 
@@ -426,7 +428,7 @@ function results = optSwap(model, opt)
         z2 = [find(Ay2); find(Aq2); find(As2)];
         zSize = size([z1;z2],1);
         
-        if printLevel>=3, disp(sprintf('zSize %d', zSize)); end
+        if debugFlag, disp(sprintf('zSize %d', zSize)); end
         
         yqsCoupledSize = length(yCoupledInd) + length(qCoupledInd) + length(sCoupledInd);
         Ayqs = [
@@ -543,47 +545,55 @@ function results = optSwap(model, opt)
         A3 = [
         %dual constraints
             A2_w, sparse(A2_wRow,ACol), Ayqs2_w;   %  19316       23762
-        % swap constraints
-            zeros(qSize, uSize + zSizeOptKnock2 + vSize + ySize), ...
-                       eye(qSize), sCoupledMatrix;
+        % swap constraint
+            zeros(qSize, uSize + zSizeOptKnock2 + vSize + ySize), eye(qSize), sCoupledMatrix;
         %feasibility constraint
             sparse(ARow,uSize+zSizeOptKnock2), A, Ayqs   % 10134       23762
            ];
+
+        B3=[
+        % dual constraints
+            B2_w;
+        % swap constraint
+            ones(qSize, 1);
+        % feasibility constraint
+            B
+           ];
         
+        % require swap if property is false
         if ~allowDehydrogenaseKnockout
+            if debugFlag, display('dehydrogenase knockouts not allowed'); end
             A3 = [A3;
                   zeros(qSize, uSize + zSizeOptKnock2 + vSize + ySize), ...
                   -eye(qSize), -sCoupledMatrix
                  ];
+             B3 = [B3; -ones(qSize, 1)];
+        else
+            if debugFlag, display('dehydrogenase knockouts are allowed'); end
         end
-
-        B3=[
-            B2_w;
-            ones(qSize, 1);
-            B
-           ];
-        
-        if ~allowDehydrogenaseKnockout, B3 = [B3; -ones(qSize, 1)]; end
         
         % add knockout and swap count constraints
         if K >= 0 % knockoutNum
+            if debugFlag, fprintf('using K=%d knockoutNum constraint\n',K); end
             A3 = [A3; ...
                   zeros(1, uSize + zSizeOptKnock2 + vSize), ...
-                  -ones(1, ySize), ...
-                  zeros(1, qSize + sSize);];
-            B3 = [B3; K - ySize];
+                  -ones(1, ySize + qSize + sSize)
+                 ];
+            B3 = [B3; K - ySize - qSize];
         end
         if L >= 0 % swapNum
+            if debugFlag, fprintf('using L=%d swapNum constraint\n',L); end
             A3 = [A3; ...
                   zeros(1, uSize + zSizeOptKnock2 + vSize + ySize), ...
-                  -ones(1, qSize),...
-                  zeros(1, sSize)];
-            B3 = [B3; L - qSize; ];
+                  zeros(1, qSize),...
+                  ones(1, sSize)];
+            B3 = [B3; L];
         end
         if X >= 0 % interventionNum
+            if debugFlag, fprintf('using X=%d interventionNum constraint\n',X); end
             A3 = [A3; ...
                   zeros(1, uSize + zSizeOptKnock2 + vSize), ...
-                  -ones(1, ySize), -ones(1, qSize), ...
+                  -ones(1, ySize + qSize), ...
                   zeros(1, sSize)];
             B3 = [B3; X - ySize - qSize];
         end
@@ -610,16 +620,18 @@ function results = optSwap(model, opt)
         intVars = (A2_wCol + ACol + 1):(A2_wCol + ACol + yqsSize);
         
         results = setupAndRunMILP(C3, A3, B3, lb3, ub3, intVars, ...
-                                  model, yInd, qInd, sInd, K, L, ...
-                                  coupledFlag, coupled);
+                                  model, yInd, qInd, sInd, K, L, X, ...
+                                  coupled, qsCoupling);
     end
 end
 
-function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
-                                   model, yInd, qInd, sInd, K, L, ...
-                                   coupledFlag, coupled);
 
-    global maxTime
+
+function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
+                                   model, yInd, qInd, sInd, K, L, X, ...
+                                   coupled, qsCoupling);
+
+    global solverParams
     global printIntermediateSolutions intermediateSolutionsFile
     %solve milp
     %parameter for mip assign
@@ -637,7 +649,7 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
 
     %solving mip
     disp('set up MILP')
-    global useCobraSolver
+    global useCobraSolver debugFlag
     if (useCobraSolver)
         % maximize
         MILPproblem.c = C;
@@ -656,7 +668,7 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
             disp('setting up callback')
             warning('not finished')
         end
-        [MILPproblem, solverParams] = setParams(MILPproblem, true, maxTime); 
+        [MILPproblem, solverParams] = setParams(MILPproblem, true, solverParams); 
         disp('Run COBRA MILP')
         Result_cobra = solveCobraMILP(MILPproblem,solverParams);
 
@@ -669,7 +681,7 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
         results.chemical = -Result_cobra.obj;
         results.f_k = Result_cobra.obj;
         results.solver = Result_cobra.solver;
-        save results
+        if debugFlag, save('raw results','results'); end
     else
         % minimize
         Prob_OptKnock2=mipAssign(-C, A, [], B, lb, ub, [], 'part 3 MILP', ...
@@ -677,7 +689,7 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
                                  intVars, VarWeight, KNAPSACK, fIP, xIP, ...
                                  f_Low, x_min, x_max, f_opt, x_opt);
         disp('setParams')
-        Prob_OptKnock2 = setParams(Prob_OptKnock2, false, maxTime);
+        Prob_OptKnock2 = setParams(Prob_OptKnock2, false, solverParams);
 
         if printIntermediateSolutions
             disp('setting up callback')
@@ -692,10 +704,10 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
         end
         
         disp('tomRun') 
-        warning('hack to show script hierarchy')
+        if debugFlag, warning('hack to show script hierarchy'); end
         Result_tomRun = tomRun('cplex', Prob_OptKnock2, 10);
 
-        save('raw results','Result_tomRun');
+        if debugFlag, save('raw results','Result_tomRun'); end
 
         results.raw = Result_tomRun; 
         results.y = Result_tomRun.x_k(intVars(1:ySize));
@@ -708,6 +720,7 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
         results.solver = 'tomlab_cplex';
     end
     
+    results.model = model;
     results.C = C;
     results.A = A;
     results.B = B;
@@ -715,17 +728,32 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
     results.ub = ub;
     results.K = K;
     results.L = L; 
+    results.X = X;
     results.intVars = intVars;
     results.yInd = yInd;
     results.qInd = qInd;
     results.sInd = sInd;
     results.organismObjectiveInd = model.organismObjectiveInd;
     results.chemicalInd = model.chemicalInd;
+    
     results.knockoutRxns = model.rxns(yInd(results.y==0));
-    results.knockoutDhs = model.rxns(qInd(results.q==0 & results.s==0));
-    results.knockoutRxns = [results.knockoutRxns; results.knockoutDhs];
-    results.swapRxns = model.rxns(qInd(results.s==1));
-    % save('sorted results', 'results');
+
+    results.coupled = coupled;
+    results.qsCoupling = qsCoupling; 
+    
+    if ~isempty(qsCoupling)
+        u = qsCoupling(:,1);
+        v = qsCoupling(:,2);
+        for i=1:size(qsCoupling,1)
+            s_to_q(i,1) = results.s(ismember(sInd,v(ismember(u,qInd(i)))));
+        end 
+        results.knockoutDhs = model.rxns(qInd(results.q==0 & s_to_q==0));
+        results.knockoutRxns = [results.knockoutRxns; results.knockoutDhs];
+        results.swapRxns = model.rxns(qInd(s_to_q==1));
+    end
+    if debugFlag
+        save('sorted results', 'results');
+    end
 end
 
 
@@ -762,4 +790,13 @@ function consModel=prepareOptSwapModel(model, chemicalInd, biomassRxn)
     consModel.S(sel1)=0;
     consModel.S(sel2)=0;
 
+end
+
+function testDebugFlag()
+    global debugFlag
+    if debugFlag
+        display('debug flag = true');
+    else
+        display('debug flag = false');
+    end
 end

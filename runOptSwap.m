@@ -29,7 +29,7 @@ function runOptSwap(opt)
     if ~isfield(opt, 'swapAllDhs'), opt.swapAllDhs = false; end
     if ~isfield(opt, 'rxnSet'), opt.rxnSet = {}; end
     if ~isfield(opt, 'aerobicString'), opt.aerobicString = 'anaerobic'; end
-    if ~isfield(opt, 'maxTime'), opt.maxTime = 60; end
+    if ~isfield(opt, 'solverParams'), opt.solverParams = struct(); end %seconds
     if ~isfield(opt, 'substrate'), opt.substrate = 'EX_glc(e)'; end
     if ~isfield(opt, 'printIntermediateSolutions') % unfinished
         opt.printIntermediateSolutions = false; 
@@ -54,7 +54,7 @@ function runOptSwap(opt)
     swapAllDhs = opt.swapAllDhs;
     rxnSet = opt.rxnSet;
     aerobicString = opt.aerobicString;
-    maxTime = opt.maxTime;
+    solverParams = opt.solverParams;
     substrate = opt.substrate;
     printIntermediateSolutions = opt.printIntermediateSolutions;
     useCobraSolver = opt.useCobraSolver;
@@ -158,7 +158,7 @@ function runOptSwap(opt)
     options.notKnockableRxns = notSelectedRxns;
     options.swapNum = swapNum;
     options.dhRxns = dhRxns;
-    options.maxTime = maxTime;
+    options.solverParams = solverParams;
     options.printIntermediateSolutions = printIntermediateSolutions;
     if printIntermediateSolutions
         options.intermediateSolutionsFile = [experiment '-MILPsols.csv'];
@@ -192,9 +192,7 @@ function runOptSwap(opt)
         t = toc(lTic);
 
         % Project   Date    Time    Name    Script  Knockout num    Swap num
-        % Target reaction   Yield at min biomass / TH KO    Yield at min biomass
-        %  / OptSwap    Yield at max biomass  / TH KO   Yield at max biomass /
-        % OptSwap,Knockouts,Swaps,Time (min),Min biomass,Dehydrogenase reactions
+        % Intervention num ... 
         myPrint('OptSwap,', []);
         myPrint('%s,', experiment);
         myPrint('%s,', datestr(now, 'mm/dd/yyyy'));
@@ -203,6 +201,7 @@ function runOptSwap(opt)
         myPrint('optSwap.m,', []);
         myPrint('%d,', options.knockoutNum);
         myPrint('%d,', options.swapNum);
+        myPrint('%d,', options.interventionNum); 
         myPrint('%s,', targetRxn);
         myPrint('%.4f,', results.f_k);
         printMaxYield(modelWT,targetRxn);
@@ -235,11 +234,16 @@ function runOptSwap(opt)
         end
         myPrint('%d,', results.exitFlag);
         if isnumeric(results.inform)
-            myPrint('%d', results.inform);
+            myPrint('%d,', results.inform);
         else
             myPrint('%s,', results.inform);
         end
         myPrint('%s,', results.solver);
+        fi = fieldnames(solverParams);
+        for i=1:length(fi)
+            myPrint('%s: ', fi{i});
+            myPrint('%.2e,', getfield(solverParams, fi{i}));
+        end
     end
     fclose(fileId);
 end

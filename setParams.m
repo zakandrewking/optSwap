@@ -1,25 +1,42 @@
-function [newProb,solverParams] = setParams(prob, cobraSolverFlag, maxTime)
+function [newProb,solverParams] = setParams(prob, cobraSolverFlag, nonDefaultParameters)
 
 % OPTIONAL
 % cobraSolverFlag - setup for solveCobraMILP
 % maxTime - time limit in minutes (default 24 hours)
     if (nargin < 2 || isempty(cobraSolverFlag)), cobraSolverFlag = false; end
-    if (nargin < 3 || isempty(maxTime)), maxTime = 24*60; end
 
-    intTol = 10e-9;
+    intTol = 10e-12;
     relMipGapTol = 1e-6;
-    timeLimit = maxTime * 60; %seconds
     logFile = 'log.txt';
     printLevel = 10;
     feasTol = 1e-8;
     optTol = 1e-8;
     NUMERICALEMPHASIS = 1;
     absMipGapTol = 1e-8;
-
+    EPRHS = 1e-9;
+    maxTime = 12*60*60; % seconds
+    THREADS = 10;
+    
+    if isfield(nonDefaultParameters, 'maxTime')
+        maxTime = nonDefaultParameters.maxTime;
+        fprintf('max time: %d seconds\n', maxTime);
+    end
+    if isfield(nonDefaultParameters, 'intTol')
+        intTol = nonDefaultParameters.intTol;
+        fprintf('intTol: %.1e\n', intTol);
+    end
+    if isfield(nonDefaultParameters, 'EPRHS')
+        EPRHS = nonDefaultParameters.EPRHS;
+        fprintf('EPRHS: %.1e\n', EPRHS);
+    end
+    if isfield(nonDefaultParameters, 'THREADS')
+        THREADS = nonDefaultParameters.THREADS;
+        fprintf('THREADS: %d\n', THREADS);
+    end
     if cobraSolverFlag
         newProb = prob;
         solverParams.relMipGapTol = relMipGapTol;
-        solverParams.timeLimit = timeLimit;
+        solverParams.timeLimit = maxTime;
         solverParams.logFile = logFile;
         solverParams.printLevel = printLevel;
         % if USE_MIP_FOCUS_1, solverParams.MIPFocus = 1;
@@ -49,7 +66,9 @@ function [newProb,solverParams] = setParams(prob, cobraSolverFlag, maxTime)
         newProb.MIP.cpxControl.NUMERICALEMPHASIS = ...
             NUMERICALEMPHASIS;
         newProb.MIP.cpxControl.SCAIND=1;
-        newProb.MIP.cpxControl.TILIM=timeLimit;
+        newProb.MIP.cpxControl.TILIM=maxTime;
+        newProb.MIP.cpxControl.EPRHS = EPRHS;
+        newProb.MIP.cpxControl.THREADS = THREADS;
         newProb.CPLEX.LogFile = 'cplex-log.txt';
     end
 end

@@ -1,14 +1,14 @@
-function loopOptSwap3
+function loopOptSwap4
 
 % setup Cleaner
     cleaner = onCleanup(@() cleanup);
     global run status
     status = 'starting';    
-    run = 'best of 2--13 products--aerobic glucose--dh kos ok';
     
     interventionNum = 2;
-    aer = {'aerobic'};
-    substrates = {'EX_glc(e)', 'EX_glc(e)'};
+    run = sprintf('best of %d--anaerobic on glucose--intTol 1e-09', interventionNum); 
+    aer = {'anaerobic'};
+    substrates = {'EX_glc(e)'};
     for i=1:1
         status = sprintf('run %d', i);
         opt.knockoutNum = -1;
@@ -32,12 +32,11 @@ function loopOptSwap3
         opt.aerobicString = aer{i};
         opt.substrate = substrates{i};
         opt.solverParams.maxTime = 12*60*60; %sec
-        opt.solverParams.intTol = 1e-09;
-        opt.solverParams.EPRHS = 1e-07;
-        opt.solverParams.THREADS = 10;
+        opt.solverParams.intTol = 1e-09; %sec
+        opt.solverParams.EPRHS = 1e-07; %sec
         opt.useCobraSolver = false; 
         opt.allowDehydrogenaseKnockout = true;
-        opt.logFile = 'database-3.csv';
+        opt.logFile = 'database-4.csv';
         runOptSwap(opt);
     end
     status = 'finished';

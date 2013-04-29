@@ -110,52 +110,6 @@ function list = dhRxnList(count)
                 'ME1'; %*
                 'LDH_D'; %*
                 'LCARR';}; %*
-    elseif strcmp(count,'yield')
-        list = {'ACALD';
-                'ALCD2x';
-                'ASAD';
-                'DHDPRy';
-                'FADRx';
-                'G6PDH2r';
-                'GAPD';
-                'GLUDy';
-                'GND';
-                'HSDy';
-                'ICDHyr';
-                'IPMD';
-                'KARA1';
-                %'MDH'; % removed becuase of loop result, for yield
-                'MTHFD';
-                'NADH16pp';
-                'PDH';
-                'PGCD';
-                'SHK3Dr';
-                'ME1'; %*
-                'LDH_D'; %*
-                'LCARR';}; %*
-    elseif strcmp(count,'yield-gludy-out')
-        list = {'ACALD';
-                'ALCD2x';
-                'ASAD';
-                'DHDPRy';
-                'FADRx';
-                'G6PDH2r';
-                'GAPD';
-        %'GLUDy';
-                'GND';
-                'HSDy';
-                'ICDHyr';
-                'IPMD';
-                'KARA1';
-                'MDH'; % removed becuase of loop result, for yield
-                'MTHFD';
-                'NADH16pp';
-                'PDH';
-                'PGCD';
-                'SHK3Dr';
-                'ME1'; %*
-                'LDH_D'; %*
-                'LCARR';}; %*
     else
         error('bad count')
     end
