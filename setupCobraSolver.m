@@ -27,7 +27,7 @@ function solverOK = setupCobraSolver
     if solverOK
         % test gurobi
         try
-            model = loadModelNamed('iAF');
+            model = loadModelNamed('iJO');
             soln = optimizeCbModel(model);
         catch err
             solverOK = 0;
