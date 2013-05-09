@@ -4,40 +4,31 @@ function loopOptSwap2
     cleaner = onCleanup(@() cleanup);
     global run status
     status = 'starting';    
-    run = 'best of 1--13 products--anaerobic aerobic glucose--dh kos ok';
+    run = 'ethanol-glucose-anaerobic-1234-K_RobustKnock';
     
-    interventionNum = 1;
-    aer = {'anaerobic', 'aerobic'};
-    substrates = {'EX_glc(e)', 'EX_glc(e)'};
-    for i=1:2
+    interventionNum = [-1, -1, -1, -1];
+    knockoutNum     = [ 1,  2,  3,  4];
+    swapNum =         [ 0,  0,  0,  0];
+
+    aer = {'anaerobic'};
+    substrates = {'EX_glc(e)'};
+    for i=1:4
         status = sprintf('run %d', i);
-        opt.knockoutNum = -1;
-        opt.swapNum = -1;
-        opt.interventionNum = interventionNum;
-        opt.targetRxns = {'EX_etoh(e)';
-                          'EX_for(e)';
-                          'EX_succ(e)';
-                          'EX_ac(e)';
-                          'EX_lac-D(e)';
-                          'EX_akg(e)';
-                          'EX_ala-L(e)';
-                          'EX_glyc(e)';
-                          'EX_ser-L(e)';
-                          'EX_pyr(e)';
-                          'EX_fum(e)';
-                          'EX_mal-L(e)';
-                          'EX_glu-L(e)';
-                         };
+        opt.knockoutNum = knockoutNum(i);
+        opt.swapNum = swapNum(i);
+        opt.interventionNum = interventionNum(i);
+        opt.targetRxns = {'EX_etoh(e)'};
         opt.experiment = run;
-        opt.aerobicString = aer{i};
-        opt.substrate = substrates{i};
+        opt.aerobicString = aer{1};
+        opt.substrate = substrates{1};
         opt.solverParams.maxTime = 12*60*60; %sec
         opt.solverParams.intTol = 1e-09;
         opt.solverParams.EPRHS = 1e-07;
         opt.solverParams.THREADS = 10;
-        opt.useCobraSolver = false; 
-        opt.allowDehydrogenaseKnockout = true;
+        opt.useCobraSolver = false;
+        opt.allowDehydrogenaseKnockout = false;
         opt.logFile = 'database-2.csv';
+        opt.canKnockDHs = true;
         runOptSwap(opt);
     end
     status = 'finished';
