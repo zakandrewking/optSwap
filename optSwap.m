@@ -44,11 +44,11 @@ function results = optSwap(model, opt)
     if ~exist('opt','var')
         opt = struct();
     end
-    if ~isfield(opt,'knockType'), opt.knockType = 0; end
+    if ~isfield(opt,'knockType'), opt.knockType = 2; end
     if ~isfield(opt,'targetRxn'), opt.targetRxn = 'EX_for(e)'; end
-    if ~isfield(opt,'swapNum'), opt.swapNum = 0; end
-    if ~isfield(opt,'knockoutNum'), opt.knockoutNum = 3; end
-    if ~isfield(opt,'interventionNum'), opt.interventionNum = -1; end
+    if ~isfield(opt,'swapNum'), opt.swapNum = -1; end
+    if ~isfield(opt,'knockoutNum'), opt.knockoutNum = -1; end
+    if ~isfield(opt,'interventionNum'), opt.interventionNum = 1; end
     if ~isfield(opt,'knockableRxns'), opt.knockableRxns = {}; end
     if ~isfield(opt,'notKnockableRxns'), opt.notKnockableRxns = {}; end
     if ~isfield(opt,'useCobraSolver'), opt.useCobraSolver = 0; end
@@ -62,21 +62,18 @@ function results = optSwap(model, opt)
     if ~isfield(opt,'biomassRxn')
         opt.biomassRxn = model.rxns(model.c~=0);
     end
-    if ~isfield(opt,'dhRxns'), opt.dhRxns = {}; end
+    if ~isfield(opt,'dhRxns')
+        opt.dhRxns = {'ACALD'; 'ALCD2x'; 'ASAD'; 'DHDPRy'; 'FADRx'; 'G6PDH2r'; ...
+                      'GAPD'; 'GLUDy'; 'GND'; 'HSDy'}; 
+    end
     if ~isfield(opt, 'solverParams'), opt.solverParams = []; end
-    if ~isfield(opt, 'printIntermediateSolutions')
-        opt.printIntermediateSolutions = false;
-    end
-    if ~isfield(opt, 'intermediateSolutionsFile')
-        opt.intermediateSolutionsFile = [];
-    end
     if ~isfield(opt, 'allowDehydrogenaseKnockout')
         opt.allowDehydrogenaseKnockout = true;
     end
 
     % name global variables
-    global solverParams printIntermediateSolutions
-    global intermediateSolutionsFile useCobraSolver debugFlag
+    global solverParams 
+    global useCobraSolver debugFlag
     
     % set local variables
     knockType = opt.knockType;
@@ -91,8 +88,6 @@ function results = optSwap(model, opt)
     biomassRxn = opt.biomassRxn;
     dhRxns = opt.dhRxns;
     solverParams = opt.solverParams;
-    printIntermediateSolutions = opt.printIntermediateSolutions;
-    intermediateSolutionsFile = opt.intermediateSolutionsFile;
     allowDehydrogenaseKnockout = opt.allowDehydrogenaseKnockout;
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -639,7 +634,6 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
                                    coupled, qsCoupling);
 
     global solverParams
-    global printIntermediateSolutions intermediateSolutionsFile
     %solve milp
     %parameter for mip assign
     x_min = []; x_max = []; f_Low = -1E7; % f_Low <= f_optimal must hold
@@ -671,10 +665,6 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
         MILPproblem.vartype(intVars) = 'I';
         MILPproblem.csense = char(ones(1,length(B)).*double('L'));
         
-        if printIntermediateSolutions
-            disp('setting up callback')
-            warning('not finished')
-        end
         [MILPproblem, solverParams] = setParams(MILPproblem, true, solverParams); 
         disp('Run COBRA MILP')
         Result_cobra = solveCobraMILP(MILPproblem,solverParams);
@@ -697,18 +687,6 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
                                  f_Low, x_min, x_max, f_opt, x_opt);
         disp('setParams')
         Prob_OptKnock2 = setParams(Prob_OptKnock2, false, solverParams);
-
-        if printIntermediateSolutions
-            disp('setting up callback')
-            global optSwapCallbackOptions
-            optSwapCallbackOptions.outputFile = intermediateSolutionsFile; 
-            optSwapCallbackOptions.model = model;
-            optSwapCallbackOptions.yInd = yInd;
-            optSwapCallbackOptions.qInd = qInd;
-            optSwapCallbackOptions.intVars = intVars;
-            Prob_OptKnock2.MIP.callback(14) = 1;
-            Prob_OptKnock2.MIP.callback(7) = 1;
-        end
         
         disp('tomRun') 
         if debugFlag, warning('hack to show script hierarchy'); end
