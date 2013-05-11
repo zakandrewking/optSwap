@@ -4,19 +4,15 @@ function loopOptSwap2
     cleaner = onCleanup(@() cleanup);
     global run status
     status = 'starting';    
-    run = 'ethanol-glucose-anaerobic-1234-K_RobustKnock';
-    
-    interventionNum = [-1, -1, -1, -1];
-    knockoutNum     = [ 1,  2,  3,  4];
-    swapNum =         [ 0,  0,  0,  0];
+    run = 'ethanol-glucose-anaerobic-test cobraSolverFlag';
 
     aer = {'anaerobic'};
     substrates = {'EX_glc(e)'};
-    for i=1:4
+    for i=1:2
         status = sprintf('run %d', i);
-        opt.knockoutNum = knockoutNum(i);
-        opt.swapNum = swapNum(i);
-        opt.interventionNum = interventionNum(i);
+        opt.knockoutNum = -1;
+        opt.swapNum = -1;
+        opt.interventionNum = 1;
         opt.targetRxns = {'EX_etoh(e)'};
         opt.experiment = run;
         opt.aerobicString = aer{1};
@@ -28,7 +24,11 @@ function loopOptSwap2
         opt.useCobraSolver = false;
         opt.allowDehydrogenaseKnockout = false;
         opt.logFile = 'database-2.csv';
-        opt.canKnockDHs = true;
+        if i==1
+            opt.useCobraSolver = true;
+        else
+            opt.useCobraSolver = false;
+        end
         runOptSwap(opt);
     end
     status = 'finished';

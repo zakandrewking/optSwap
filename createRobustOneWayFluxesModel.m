@@ -4,30 +4,29 @@ function [model,yInd, yCoupledInd, qInd, qCoupledInd, sInd, sCoupledInd,...
                                       knockableRxns, notKnockableRxns, ...
                                       qsCoupling, useCobraSolver)
 
-    % CREATEROBUSTONEWAYFLUXESMODEL
-    %
-    % INPUTS
-    % originalModel
-    % chemicalInd
-    % coupledFlag - ? I think this is 1 for a reversible model, 0 for an
-    %               irreversible model.
-    %
-    % OUTPUTS
-    % originalModel
-    % yInd - Can be knocked out
-    % notYInd - Cannot be knocked out
-    % m - size(model.S,1)
-    % n - size(model.S,2)
-    % notY - Struct of counts:
-    %     notY.notGeneRelatedNum=notGeneRelatedNum;
-    %     notY.notKnockablesNum=notKnockablesNum;
-    %     notY.noInfluenceNum=noInfluenceNum;
-    % coupled - Coupled to GPR
-    % coupledYInd - Coupled to GPR, can be knocked out
-    % coupledNotYInd - Coupled to GPR, cannot be knocked out
-    % definitelyDontKnock - reactions that cannot be knocked out
-    % definitelyKnockable - reactions that can be knocked out
-
+% CREATEROBUSTONEWAYFLUXESMODEL
+%
+% INPUTS
+% originalModel
+% chemicalInd
+% coupledFlag - 1 for a reversible model; 0 for an
+%               irreversible model.
+%
+% OUTPUTS
+% originalModel
+% yInd - Can be knocked out
+% notYInd - Cannot be knocked out
+% m - size(model.S,1)
+% n - size(model.S,2)
+% notY - Struct of counts:
+%     notY.notGeneRelatedNum=notGeneRelatedNum;
+%     notY.notKnockablesNum=notKnockablesNum;
+%     notY.noInfluenceNum=noInfluenceNum;
+% coupled - Coupled to GPR
+% coupledYInd - Coupled to GPR, can be knocked out
+% coupledNotYInd - Coupled to GPR, cannot be knocked out
+% definitelyDontKnock - reactions that cannot be knocked out
+% definitelyKnockable - reactions that can be knocked out
 
     tmpModel=originalModel;
     [met_num rxn_num] = size(tmpModel.S);

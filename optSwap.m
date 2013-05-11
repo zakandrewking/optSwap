@@ -3,25 +3,35 @@ function results = optSwap(model, opt)
 % By Zachary King 8/13/2012
 %
 % INPUTS
-% model
+% model - cobra model
 %
 % OPTIONAL
 % opt - struct with any of the following options:
-%   knockType - 2 run OptSwap; 1 run robustKnock
-%   targetRxn - chemical to produce
-%   swapNum - number of swaps (-1 no limit)
-%   knockoutNum - number of knockouts (-1 no limit)
-%   interventionNum - maximum number of interventions (-1 no limit)
+%   knockType - 2 run OptSwap; 1 run robustKnock; 0 run optKnock
+%   targetRxn - reaction to be growth coupled
+%   swapNum - number of swaps (-1 to remove the constraint)
+%   knockoutNum - number of knockouts (-1 to remove the constraint)
+%   interventionNum - maximum number of interventions (-1 to remove the constraint)
 %   knockableRxns - reactions that should definitely be considered for knockout
-%   notKnockableRxns - reactions that should be excluded from knockout
-%   useCobraSolver - 1 use any cobra solver; 0 use tomlab cplex solver
+%   notKnockableRxns - reactions that should be excluded from knockout set
+% 
+%   useCobraSolver - 0 use TOMLAB CPLEX solver; 1 use COBRA toolbox solver
+%                    NOTE: the COBRA toolbox MILP solver routine does not set the
+%                    following parameters, which are necessary for good results:
+%                        VarWeight, KNAPSACK, fIP, xIP, f_Low, x_min, x_max, f_opt, x_opt
+%                    Therfore, we recommend using the TOMLAB CPLEX solver,
+%                    and setting useCobraSolver = 0.
+% 
 %   maxW - maximal value of dual variables (higher number will be more
 %          accurate but takes more calculation time)
 %   biomassRxn - biomass objective function in the model
 %   dhRxns - oxidoreductase reactions that can be swapped
+%   solverParams - see setParams.m for all options
 %   solverParams.maxTime - time limit in minutes
-%   allowDehydrogenaseKnockout - use less than or equal constraint to allow
-%                                dehydrogenase reaction knockouts
+%   allowDehydrogenaseKnockout - 1 use less than or equal constraint to allow
+%                                oxidoreductase reaction knockouts; 0 use
+%                                simpler equality constraint that does not
+%                                permit oxidoreductase knockouts
 %
 % OUTPUTS
 % results
@@ -77,7 +87,6 @@ function results = optSwap(model, opt)
     knockableRxns = opt.knockableRxns;
     notKnockableRxns = opt.notKnockableRxns;
     useCobraSolver = opt.useCobraSolver;
-    if useCobraSolver, error('Cobra solver code still not functional'); end
     maxW = opt.maxW;
     biomassRxn = opt.biomassRxn;
     dhRxns = opt.dhRxns;
@@ -85,6 +94,7 @@ function results = optSwap(model, opt)
     printIntermediateSolutions = opt.printIntermediateSolutions;
     intermediateSolutionsFile = opt.intermediateSolutionsFile;
     allowDehydrogenaseKnockout = opt.allowDehydrogenaseKnockout;
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     debugFlag = true;
@@ -252,7 +262,7 @@ function results = optSwap(model, opt)
         IntVars_optKnock=vSize+wSize+zSize+1:vSize+wSize+zSize+ySize;
 
 
-
+        % Run OptKnock
         if (knockType == 0)
             disp('optKnock')
 
@@ -261,6 +271,7 @@ function results = optSwap(model, opt)
                                       model, yInd, [], [], K, [], [], ...
                                       [], []);
 
+        % Run RobustKnock
         elseif (knockType == 1)
             disp('robustKnock')
             %**************************************************************************
@@ -347,6 +358,7 @@ function results = optSwap(model, opt)
                                       [], []); 
         end
         
+    % run OptSwap
     elseif (knockType == 2) 
         disp('optSwap');
         
@@ -473,14 +485,9 @@ function results = optSwap(model, opt)
         %[A_w  Ayqs_w]*(w z y)  <=  B_w
         
         awSizeRow = size(A_w, 1);
-        
-        
+      
         %%%%%%%%%%%%%%%%%%%%%%%
         
-        %%%%%%%%%%%%%%%%%%%%%%%
-        
-        
-
         %max min Cjoined*x'
         %s.t
         %Ajoined*x  <=  Bjoined
@@ -681,7 +688,7 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
         results.chemical = -Result_cobra.obj;
         results.f_k = Result_cobra.obj;
         results.solver = Result_cobra.solver;
-        if debugFlag, save('raw results','results'); end
+        if debugFlag, save('raw-results-cobra','results'); end
     else
         % minimize
         Prob_OptKnock2=mipAssign(-C, A, [], B, lb, ub, [], 'part 3 MILP', ...
@@ -707,7 +714,7 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
         if debugFlag, warning('hack to show script hierarchy'); end
         Result_tomRun = tomRun('cplex', Prob_OptKnock2, 10);
 
-        if debugFlag, save('raw results','Result_tomRun'); end
+        if debugFlag, save('raw-results-tomlab','Result_tomRun'); end
 
         results.raw = Result_tomRun; 
         results.y = Result_tomRun.x_k(intVars(1:ySize));
@@ -755,7 +762,11 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
         results.swapRxns = [];
     end
     if debugFlag
-        save('sorted results', 'results');
+        if useCobraSolver
+            save('sorted-results-cobra', 'results');
+        else
+            save('sorted-results-tomlab', 'results');
+        end
     end
 end
 

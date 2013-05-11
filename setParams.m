@@ -3,6 +3,7 @@ function [newProb,solverParams] = setParams(prob, cobraSolverFlag, nonDefaultPar
 % OPTIONAL
 % cobraSolverFlag - setup for solveCobraMILP
 % maxTime - time limit in minutes (default 24 hours)
+
     if (nargin < 2 || isempty(cobraSolverFlag)), cobraSolverFlag = false; end
 
     intTol = 10e-12;
@@ -39,14 +40,10 @@ function [newProb,solverParams] = setParams(prob, cobraSolverFlag, nonDefaultPar
         solverParams.timeLimit = maxTime;
         solverParams.logFile = logFile;
         solverParams.printLevel = printLevel;
-        % if USE_MIP_FOCUS_1, solverParams.MIPFocus = 1;
-        % else solverParams.MIPFocus = 3;
-        % end
-        % % solverParams.printLevel = printLevel;
-        % solverParams.intTol = intTol;
-        % solverParams.feasTol = feasTol;
-        % solverParams.optTol = optTol;
-        % solverParams.absMipGapTol = absMipGapTol;
+        solverParams.intTol = intTol;
+        solverParams.feasTol = feasTol;
+        solverParams.optTol = optTol;
+        solverParams.absMipGapTol = absMipGapTol;
         %gurobi default iteration limit is infinity
         
     else
