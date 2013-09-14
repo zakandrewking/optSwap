@@ -1,20 +1,27 @@
-function [dhRxns, matches] = locateDHs(model)
+function [dhRxns, matches] = locateDHs(model, mets)
 
-    theMet = 'nadh[c]';
+    if nargin < 2
+        nadh_met = 'nadh[c]';
+        nad_met = 'nad[c]';
+        nadph_met = 'nadph[c]';
+        nadp_met = 'nadp[c]';
+    else
+        nadh_met = mets.nadh;
+        nadph_met = mets.nadph;
+        nad_met = mets.nad;
+        nadp_met = mets.nadp;
+    end
+    theMet = nadh_met;
 
     nadhRxns = model.rxns(ismember(model.rxns,findRxnsFromMets(model,theMet)));
     nadhNames = model.rxnNames(ismember(model.rxns,nadhRxns));
-    nadhSubsystems = ...
-        model.subSystems(ismember(model.rxns,nadhRxns));
-    % xlswrite('iJO-DHs.xls',rxnNames);
+    nadhSubsystems =  model.subSystems(ismember(model.rxns,nadhRxns));
 
-    theMet = 'nadph[c]';
+    theMet = nadph_met;
 
     nadphRxns =  model.rxns(ismember(model.rxns,findRxnsFromMets(model,theMet)));
     nadphNames = model.rxnNames(ismember(model.rxns,nadphRxns));
-    nadphSubsystems = ...
-        model.subSystems(ismember(model.rxns,nadphRxns));
-    % xlswrite('iJO-DHs.xls',rxnNames);
+    nadphSubsystems =  model.subSystems(ismember(model.rxns,nadphRxns));
 
     % Find NADH/NADPH reaction loops
     matches = {};
@@ -23,14 +30,14 @@ function [dhRxns, matches] = locateDHs(model)
     S = full(model.S);
     rxnForms = S(:,find(ismember(model.rxns,nadhRxns)));
     %clear nadh/nad stoichiometry
-    rxnForms(find(ismember(model.mets,'nadh[c]')),:) = zeros(1,length(nadhRxns));
-    rxnForms(find(ismember(model.mets,'nad[c]')),:)  = zeros(1,length(nadhRxns));
+    rxnForms(find(ismember(model.mets,nadh_met)),:) = zeros(1,length(nadhRxns));
+    rxnForms(find(ismember(model.mets,nad_met)),:)  = zeros(1,length(nadhRxns));
 
     % all NADPH reactions
     pRxnForms = S(:,find(ismember(model.rxns,nadphRxns)));
     %clear nadh/nad stoichiometry
-    pRxnForms(find(ismember(model.mets,'nadph[c]')),:) = zeros(1,length(nadphRxns));
-    pRxnForms(find(ismember(model.mets,'nadp[c]')),:)  = zeros(1,length(nadphRxns));
+    pRxnForms(find(ismember(model.mets,nadph_met)),:) = zeros(1,length(nadphRxns));
+    pRxnForms(find(ismember(model.mets,nadp_met)),:)  = zeros(1,length(nadphRxns));
 
     for i = 1:length(nadhRxns)
         for j = 1:length(nadphRxns)
@@ -44,9 +51,6 @@ function [dhRxns, matches] = locateDHs(model)
         end
     end
 
-    dhRxns = [nadhRxns; nadphRxns];
-
-    save_to_base(1);
-
+    dhRxns = unique([nadhRxns; nadphRxns]);
 end
 

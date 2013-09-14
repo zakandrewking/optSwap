@@ -1,4 +1,4 @@
-function [returnRxns,fluxes,soln] = almaasDistribution(model,options)
+function [returnRxns, fluxes, f] = almaasDistribution(model,options)
 
 % ALMAASDISTRIBUTION
 %
@@ -39,14 +39,18 @@ function [returnRxns,fluxes,soln] = almaasDistribution(model,options)
     if ~isfield(options,'showPlot'), options.showPlot = true; end
     if ~isfield(options,'possibleLoopRxns'), options.possibleLoopRxns = {}; end
     if ~isfield(options,'autRemLoops'), options.autRemLoops = false; end
-    
-    dhRxns = locateDHs(model);
-    
-    % limit ammonia uptake rate to 100 mmol/g DW/h
-    % model = changeRxnBounds(model, 'EX_nh4(e)', -100, 'l');
+    if ~isfield(options,'glucoseExchange'), options.glucoseExchange = 'EX_glc(e)'; end
+    if ~isfield(options,'exchangeMag'), options.exchangeMag = 10; end
+
+    if isfield(options, 'metStruct')
+        dhRxns = locateDHs(model, options.metStruct);
+    else
+        dhRxns = locateDHs(model);
+    end
+    fprintf('found %d oxidoreductase reactions\n', length(dhRxns));
 
     % turn off glucose
-    model = changeRxnBounds(model, 'EX_glc(e)', 0, 'l');
+    model = changeRxnBounds(model, options.glucoseExchange, 0, 'l');
 
     % make possible loop reactions irreversible
     if ~isempty(length(options.possibleLoopRxns))
@@ -56,54 +60,37 @@ function [returnRxns,fluxes,soln] = almaasDistribution(model,options)
 
     fluxes = zeros(length(model.rxns),length(options.subs));
     for i = 1:length(options.subs)
+        % waitbar(i/length(options.subs),h);
 
         % set carbon substrate bounds
-        modelTemp = changeRxnBounds(model, options.subs{i}, -20, 'l');
+        modelTemp = changeRxnBounds(model, options.subs{i}, -options.exchangeMag, 'l');
 
-        % if options.autRemLoops
-        %     warning('this doesn''t work');
-        %     if options.usePFBA
-        %         error('cannot automatically remove loops with pFBA');
-        %         return;
-        %     end
-        %     % use FBA
-        %     soln = optimizeCbModel(modelTemp);
-        %     remRxns = modelTemp.rxns(soln.x==-1000);
-        %     modelTemp.rev(ismember(modelTemp.rxns,remRxns)) = 0;
-        %     modelTemp.lb(ismember(modelTemp.rxns,remRxns)) = 0;
-        % end
-
-        
-
-        if options.usePFBA
-            % use pFBA
-            [~,~,modelIrrevFM] = pFBA(modelTemp,'skipclass',1);
-            soln = optimizeCbModel(modelIrrevFM,'min');
-
-
-            % modelIrrevFM = removeRxns(modelIrrevFM,'netFlux',false,false);
-            % modelRev = convertToReversible(modelIrrevFM);
-            % soln = optimizeCbModel(modelRev);
-            % fluxesRev = soln.x;
-            % % fluxesRev(ismember(modelRev.rxns,'netFlux')) = [];
-            % fluxes(:,i) = fluxesRev;
-
-            fluxesIrrev = soln.x;
-            % remove pseudo reaction
-            fluxesIrrev(ismember(modelIrrevFM.rxns,'netFlux')) = [];
-
-
-            % convert irreversible fluxes to reversible ones
-            [modelIrrev,matchRev,rev2irrev,irrev2rev] = convertToIrreversible(modelTemp);
-            selPosIrrevRxns = fluxesIrrev~=0;
-            fluxesRev = zeros(length(modelTemp.rxns),1);
-            fluxesRev(irrev2rev(selPosIrrevRxns)) = fluxesIrrev(selPosIrrevRxns);
-            fluxes(:,i) = fluxesRev;
-
+        % use FBA
+        soln_fba = optimizeCbModel(modelTemp);
+        f = soln_fba.f;
+        if f == 0
+            display('no growth')
+            fluxes(:,i) = zeros(size(soln_fba.x));
         else
-            % use FBA
-            soln = optimizeCbModel(modelTemp);
-            fluxes(:,i) = soln.x;
+            % only run pFBA if the cell is viable
+            if options.usePFBA
+                % use pFBA
+                [~,~,modelIrrevFM] = pFBA(modelTemp,'geneoption',0,'tol',1e-7);
+                soln_pfba = optimizeCbModel(modelIrrevFM);
+
+                fluxesIrrev = soln_pfba.x;
+                % remove pseudo reaction
+                fluxesIrrev(ismember(modelIrrevFM.rxns,'netFlux')) = [];
+
+                % convert irreversible fluxes to reversible ones
+                [modelIrrev,matchRev,rev2irrev,irrev2rev] = convertToIrreversible(modelTemp);
+                selPosIrrevRxns = fluxesIrrev~=0;
+                fluxesRev = zeros(length(modelTemp.rxns),1);
+                fluxesRev(irrev2rev(selPosIrrevRxns)) = fluxesIrrev(selPosIrrevRxns);
+                fluxes(:,i) = fluxesRev;
+            else
+                fluxes(:,i) = soln_fba.x;
+            end
         end
 
         if options.showPlot
@@ -111,7 +98,7 @@ function [returnRxns,fluxes,soln] = almaasDistribution(model,options)
             % plot DHs
             % y = abs(soln.x(ismember(modelTemp.rxns,dhRxns)))./1000;
             % plot all reactions
-            y = abs(soln.x)./1000;
+            y = abs(fluxes(:,i))./1000;
             x = [];
             for j=-5:.2:0
                 x(end+1) = 10^(j);
@@ -122,23 +109,31 @@ function [returnRxns,fluxes,soln] = almaasDistribution(model,options)
             set(gca,'yscale','log')
             title(options.subs{i},'Interpreter', 'none')
         end
-
-        % waitbar(i/length(options.subs),h);
-        display(sprintf('Optimization %g of %g', i, length(options.subs)));
     end
 
-
     % average fluxes over reactions
-    avgFlux = mean(fluxes(ismember(modelTemp.rxns,dhRxns)),2);
-    % sort the dhRxns
-    dhRxns = model.rxns(ismember(modelTemp.rxns,dhRxns));
+    avgFlux = mean(fluxes,2);
+    % just select fluxes for dh reactions
+    avgFlux = avgFlux(ismember(model.rxns, dhRxns));
     % find the largest absolute fluxes
     avgFlux = abs(avgFlux);
+    % keep track of indices
     avgFlux(:,2) = (1:length(avgFlux))';
+    % sort descending by column 1
     avgFlux = sortrows(avgFlux,-1);
-    returnRxns = cell(options.dhCount,1);
+    count = min(length(dhRxns), options.dhCount);
+    % initialize return reactions
+    returnRxns = cell(count,1);
     for i=1:length(returnRxns)
         returnRxns(i) = dhRxns(avgFlux(i,2));
     end
-    fluxes = avgFlux(1:options.dhCount,1);
+    fluxes = avgFlux(1:count,1);
+
+    % fprintf('flux through (R,R)-butanediol dehydrogenase: %.2f\n', ...
+    %         soln_fba.x(ismember(modelTemp.rxnNames, ['(R,R)-butanediol ' ...
+    %                     'dehydrogenase'])));
+    % model.rxnNames(ismember(model.rxns,returnRxns{1}))
+    % fluxes(1)
+    % fprintf('flux through glyceraldehyde-3-phosphate dehydrogenase: %.2f\n', ...
+    %         soln_fba.x(ismember(modelTemp.rxnNames, 'glyceraldehyde-3-phosphate dehydrogenase')));    
 end

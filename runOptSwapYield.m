@@ -10,12 +10,21 @@ function runOptSwapYield(options)
     else
         dhRxns = dhRxnList('yield');
     end
+    if isfield(options, 'targetRxns')
+        targetRxns = options.targetRxns;
+    else
+        targetRxns = returnTargetRxns();    
+    end        
+    if isfield(options, 'modelname')
+        modelname = options.modelname;
+    else
+        modelname = options.modelname;
+    end        
 
     global fileId
     fileId = fopen(logFile, 'a');
 
-    targetRxns = returnTargetRxns();    
-    [model,biomassRxn] = setupModel('iJO',substrate,aerobicString,thko);
+    [model,biomassRxn] = setupModel(modelname,substrate,aerobicString,thko);
     for i=1:length(targetRxns)
         lTic = tic;
         opt.useCobraSolver = true;

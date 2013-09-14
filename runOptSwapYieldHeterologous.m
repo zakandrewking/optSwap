@@ -5,13 +5,17 @@ function runOptSwapYieldHeterologous(options)
     swapNum = options.swapNum;
     logFile = options.logFile;
     thko = options.thko;
+    if isfield(options, 'targetRxns')
+        targetRxns = options.targetRxns;
+    else
+        targetRxns = returnTargetRxns();    
+    end        
 
     global fileId
     fileId = fopen(logFile, 'a');
     
     dhRxns = dhRxnList('yield');
 
-    targetRxns = returnTargetRxns();
     subSystems = returnSubSystems();
     [model,biomassRxn] = setupModel('iJO-h',substrate,aerobicString,thko);
     for i=1:length(targetRxns)

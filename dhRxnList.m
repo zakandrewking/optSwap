@@ -87,14 +87,14 @@ function list = dhRxnList(count)
                 'ME1'; %*
                 'LDH_D'; %*
                 'LCARR';}; %*
-    elseif count==20
+    elseif count=='yield'
         list = {'ACALD';
                 'ALCD2x';
                 'ASAD';
                 'DHDPRy';
                 'FADRx';
                 'G6PDH2r';
-        % 'GAPD';
+                'GAPD';
         % 'GLUDy';% removed becuase of loop result, for yield
                 'GND';
                 'HSDy';
