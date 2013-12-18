@@ -9,7 +9,12 @@ function runOptSwapYieldHeterologous(options)
         targetRxns = options.targetRxns;
     else
         targetRxns = returnTargetRxns();    
-    end        
+    end         
+    if isfield(options, 'minBiomass')
+        minBiomass = options.minBiomass;
+    else
+        minBiomass = 0.1
+    end 
 
     global fileId
     fileId = fopen(logFile, 'a');
@@ -23,7 +28,7 @@ function runOptSwapYieldHeterologous(options)
         opt.useCobraSolver = true;
         opt.biomassRxn = biomassRxn;
         opt.swapNum = swapNum;
-        opt.minBiomass = 0.1;
+        opt.minBiomass = minBiomass;
         opt.dhRxns = dhRxns;
         opt.targetRxn = targetRxns{i};
 
@@ -42,7 +47,7 @@ function runOptSwapYieldHeterologous(options)
         
         modelT = modelSwap(modelT, knockoutDhs, false);
         modelT = changeObjective(modelT, opt.targetRxn);
-        modelT = changeRxnBounds(modelT, biomassRxn, 0.1, 'l');
+        modelT = changeRxnBounds(modelT, biomassRxn, opt.minBiomass, 'l');
         soln = optimizeCbModel(modelT);
        
         myPrint('%s\t',targetRxns{i});

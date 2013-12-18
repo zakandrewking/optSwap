@@ -1,4 +1,4 @@
-function productionEnvelopeForSwaps(targetRxns,swaps,kos,aerobicString,substrate)
+function productionEnvelopeForSwaps(modelName,targetRxns,swaps,kos,aerobicString,substrate)
 % productionEnvelopeForSwaps
 %
 % INPUTS
@@ -60,7 +60,7 @@ function productionEnvelopeForSwaps(targetRxns,swaps,kos,aerobicString,substrate
     % setup model
     keepWtDh = false;
     global biomassRxn
-    [model, biomassRxn] = setupModel('iJO',substrate,aerobicString,'THKO');
+    [model, biomassRxn] = setupModel(modelName,substrate,aerobicString,'nothko');
 
     color = {'k', 'Blue', 'Red', 'Green'};
     lineStyle = {'-', '--', '-', '--'};

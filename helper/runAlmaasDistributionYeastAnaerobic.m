@@ -1,20 +1,17 @@
-function runAlmaasDistributionYeast
+function runAlmaasDistributionYeastAnaerobic
 
     count = 200;
     % glc, D-xyl, gylc, L-arab
     % subs = {'r_1714', 'r_1718', 'r_1808', 'r_1878', ...
     %         'r_1714', 'r_1718', 'r_1808', 'r_1878'};
-    subs = {'EX_glc(e)', 'EX_xyl-D(e)', ...
-            'EX_glc(e)', 'EX_xyl-D(e)'};
-    aerString = {'aerobic', 'aerobic', ...
-                 'anaerobic', 'anaerobic'};
+    subs = {'EX_glc(e)', 'EX_xyl-D(e)'};
+    aerString = {'anaerobic', 'anaerobic'};
     s = length(subs);
     out = cell(s,1);
     f_out = zeros(s,1);
     for i=1:s
         fprintf('Case %d of %d\n', i, length(subs));
         model = setupModel('iMM904',subs{i},aerString{i});
-        model = changeRxnBounds(model, 'ALCD2ir', 0, 'b');
         options.subs = subs{i};
         options.usePFBA = true;
         options.dhCount = count;
@@ -27,8 +24,8 @@ function runAlmaasDistributionYeast
         out{i} = [returnRxns, num2cell(fluxes)];
         f_out(i) = f;
     end
-    fileId = fopen('almaas_iMM904_all_dh_output_pFBA_ALCD2ir-ko.tsv', 'w');
-    fprintf(fileId, 'glc\t\tD-xyl\t\tglc\t\tD-xyl\n');
+    fileId = fopen('almaas_iMM904_all_dh_output_pFBA_anaerobic.tsv', 'w');
+    fprintf(fileId, 'glc\t\tD-xyl\t\tgylc\t\tL-arab\t\tglc\t\tD-xyl\t\tgylc\t\tL-arab\n');
     
 
     for j=0:count*2

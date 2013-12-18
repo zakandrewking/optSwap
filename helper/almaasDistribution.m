@@ -70,12 +70,12 @@ function [returnRxns, fluxes, f] = almaasDistribution(model,options)
         f = soln_fba.f;
         if f == 0
             display('no growth')
-            fluxes(:,i) = zeros(size(soln_fba.x));
+            fluxes(:,i) = zeros(size(fluxes(:,1)));
         else
             % only run pFBA if the cell is viable
             if options.usePFBA
                 % use pFBA
-                [~,~,modelIrrevFM] = pFBA(modelTemp,'geneoption',0,'tol',1e-7);
+                [~,~,modelIrrevFM] = pFBA(modelTemp,'geneoption',0,'tol',1e-7,'skipclass',1);
                 soln_pfba = optimizeCbModel(modelIrrevFM);
 
                 fluxesIrrev = soln_pfba.x;

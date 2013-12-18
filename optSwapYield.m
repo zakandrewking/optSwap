@@ -34,15 +34,15 @@ function results = optSwapYield(model, opt)
     if ~isfield(opt,'dhRxns'), opt.dhRxns = {}; end
     if ~isfield(opt,'minBiomass'), opt.minBiomass = 0.0; end
     if ~isfield(opt, 'maxTime'), opt.maxTime = 60; end %min
-    
+
     maxTime = opt.maxTime;
 
     printLevel = 10;
-    
+
     % swap all dh's
     [model, newNames, qsCoupling] = modelSwap(model, opt.dhRxns, true);
     model.lb(ismember(model.rxns, opt.biomassRxn)) = opt.minBiomass;
-    
+
     chemicalInd = find(ismember(model.rxns, opt.targetRxn));
     if printLevel>=3, display(sprintf('chemical index %d', chemicalInd)); end
 
@@ -54,13 +54,13 @@ function results = optSwapYield(model, opt)
 
     disp('preparing model')
     consModel = prepareOptSwapModel(model, chemicalInd, opt.biomassRxn);
-    
+
     disp('createRobustOneWayFluxesModel')
     [model, qInd, qCoupledInd, sInd, sCoupledInd,...
      notYqsInd, notYqsCoupedInd, m, n, coupled] = ...
         createRobustOneWayFluxesModelYield(consModel, chemicalInd, coupledFlag, ...
-                                      qsCoupling, opt.useCobraSolver);
-    
+                                           qsCoupling, opt.useCobraSolver);
+
     % sizes
     qSize = length(qInd); qCoupledSize = length(qCoupledInd);
     sSize = length(sInd); sCoupledSize = length(sCoupledInd);
@@ -84,13 +84,13 @@ function results = optSwapYield(model, opt)
 
     I = eye(m);
     A=[model.S;
-        -model.S;
-        I(notYqsInd,:);
-        I(notYqsCoupedInd,:);
-        -I(notYqsInd,:);
-        -I(notYqsCoupedInd,:);
-        I([qInd; qCoupledInd; sInd; sCoupledInd;],:);
-        -I([qInd; qCoupledInd; sInd; sCoupledInd;],:);
+       -model.S;
+       I(notYqsInd,:);
+       I(notYqsCoupedInd,:);
+       -I(notYqsInd,:);
+       -I(notYqsCoupedInd,:);
+       I([qInd; qCoupledInd; sInd; sCoupledInd;],:);
+       -I([qInd; qCoupledInd; sInd; sCoupledInd;],:);
       ];
 
     [aSizeRow, vSize] = size(A);
@@ -107,7 +107,7 @@ function results = optSwapYield(model, opt)
     As1=As1*diag(model.ub);
 
     for j=1:length(coupled)
-        if (model.ub(coupled(j,1)) ~=0) 
+        if (model.ub(coupled(j,1)) ~=0)
             Aq1(coupled(j,2), coupled(j,1)) = ...
                 Aq1(coupled(j,2), coupled(j,1))  .*  ...
                 (model.ub(coupled(j,2)) ./ model.ub(coupled(j,1)));
@@ -161,12 +161,12 @@ function results = optSwapYield(model, opt)
         sCoupledMatrix(i,sInd==thisSIndex) = 1;
     end
     A = [A, Ayqs;
-         % limit swap num
+    % limit swap num
          zeros(1, vSize), -ones(1, qSize),  zeros(1, sSize);
-         % swap constraints
+    % swap constraints
          zeros(qSize, vSize), eye(qSize), sCoupledMatrix;
          zeros(qSize, vSize), -eye(qSize), -sCoupledMatrix;];
-    
+
     %so: [A,Ayqs]x<=B;
     B = [
         zeros(2*n,1);
@@ -184,16 +184,16 @@ function results = optSwapYield(model, opt)
     % Maximize chemicalInd
     C = [model.C_chemical;
          zeros(yqsSize, 1);];
-    
+
     intVars = (vSize + 1):(vSize + yqsSize);
     fprintf('size of intVars: %d\n', length(intVars));
     lb = [model.lb;
           zeros(yqsSize, 1)];
     ub = [model.ub;
           ones(yqsSize, 1)];
-    
+
     useCobraSolver = opt.useCobraSolver;
-    
+
     %solve milp
     %parameter for mip assign
     x_min = []; x_max = []; f_Low = -1E7; % f_Low <= f_optimal must hold
@@ -225,15 +225,25 @@ function results = optSwapYield(model, opt)
         [MILPproblem,solverParams] = setParams(MILPproblem, true, maxTime);
         disp('Run COBRA MILP')
         Result_cobra = solveCobraMILP(MILPproblem,solverParams);
-        
+
         results.raw = Result_cobra;
-        results.q = Result_cobra.full(intVars(1:qSize));
-        results.s = Result_cobra.full(intVars(qSize+1:qSize+sSize));
         results.exitFlag = Result_cobra.stat;
         results.inform = Result_cobra.origStat;
         results.f_k = Result_cobra.obj;
-        results.solver = Result_cobra.solver; 
-    else 
+        results.solver = Result_cobra.solver;
+        try
+            results.q = Result_cobra.full(intVars(1:qSize));
+            results.s = Result_cobra.full(intVars(qSize+1:qSize+sSize));
+        catch err
+            if (strcmp(err.identifier, 'MATLAB:badsubscript'))
+                results.q = [];
+                results.s = [];
+            else
+                rethrow(err);
+            end
+        end
+
+    else
         Prob_OptKnock2=mipAssign(-C, A, [], B, lb, ub, [], 'part 3 MILP', ...
                                  setupFile, nProblem, ...
                                  intVars, VarWeight, KNAPSACK, fIP, xIP, ...
@@ -242,10 +252,10 @@ function results = optSwapYield(model, opt)
         disp('setParams')
         Prob_OptKnock2 = setParams(Prob_OptKnock2, false, maxTime);
         disp('tomRun')
-        warning('hack to show script hierarchy') 
+        warning('hack to show script hierarchy')
         Result_tomRun = tomRun('cplex', Prob_OptKnock2, 2);
-      
-        results.raw = Result_tomRun; 
+
+        results.raw = Result_tomRun;
         results.q = Result_tomRun.x_k(intVars(1:qSize));
         results.s = Result_tomRun.x_k(intVars(qSize+1:qSize+sSize));
         results.exitFlag = Result_tomRun.ExitFlag;
@@ -259,7 +269,7 @@ function results = optSwapYield(model, opt)
     results.B = B;
     results.lb = lb;
     results.ub = ub;
-    results.L = L; 
+    results.L = L;
     results.intVars = intVars;
     results.qInd = qInd;
     results.sInd = sInd;

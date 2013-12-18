@@ -18,8 +18,18 @@ function runOptSwapYield(options)
     if isfield(options, 'modelname')
         modelname = options.modelname;
     else
-        modelname = options.modelname;
+        modelname = 'iJO';
     end        
+    if isfield(options, 'minBiomass')
+        minBiomass = options.minBiomass;
+    else
+        minBiomass = 0.1
+    end
+    if isfield(options, 'nondefaultReactionBounds')
+        nondefaultReactionBounds = options.nondefaultReactionBounds;
+    else
+        nondefaultReactionBounds = [];
+    end
 
     global fileId
     fileId = fopen(logFile, 'a');
@@ -30,13 +40,19 @@ function runOptSwapYield(options)
         opt.useCobraSolver = true;
         opt.biomassRxn = biomassRxn;
         opt.swapNum = swapNum;
-        opt.minBiomass = 0.1;
+        opt.minBiomass = minBiomass;
         opt.dhRxns = dhRxns;
         opt.targetRxn = targetRxns{i};
         
         modelT = model;
         modelT = setupModelForTarget(modelT, opt.targetRxn);
-        
+        for z=1:length(nondefaultReactionBounds)
+            modelT = changeRxnBounds(modelT, nondefaultReactionBounds{z}{1}, ...
+                                     nondefaultReactionBounds{z}{2}, 'l');
+            modelT = changeRxnBounds(modelT, nondefaultReactionBounds{z}{1}, ...
+                                     nondefaultReactionBounds{z}{3}, 'u');
+        end
+
         if opt.swapNum==0
             f_k = '';
             knockoutDhs = {};
@@ -48,7 +64,7 @@ function runOptSwapYield(options)
         
         modelT = modelSwap(modelT, knockoutDhs, false);
         modelT = changeObjective(modelT, opt.targetRxn);
-        modelT = changeRxnBounds(modelT, biomassRxn, 0.1, 'l');
+        modelT = changeRxnBounds(modelT, biomassRxn, minBiomass, 'l');
         soln = optimizeCbModel(modelT);
         
         myPrint('%s\t',targetRxns{i});
@@ -67,6 +83,7 @@ function runOptSwapYield(options)
         t = toc(lTic);
         myPrint('%.1f', t);
         myPrint('\n',[]);
+
     end
     fclose(fileId);
 end
