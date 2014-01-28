@@ -46,12 +46,19 @@ def test_max_growth_rate():
     
 def test_yield_for_product():
     model, biomass_reaction = setup_model('iJO1366', aerobic=True)
-    y = yield_for_product(model, 'EX_etoh_e', 10, 2, 6)
+    y = yield_for_product(model, 'EX_etoh_e', 'EX_glc_e')
     assert_approx_equal(y, 0.66, significant=2)
 
 def test_swap_yield():
     model, biomass_reaction = setup_model('iJO1366', aerobic=False)
-    yields = swap_yield(model, 'GAPD', 'EX_cys__L_e', biomass_reaction,
-                        10, 3, 6, print_results=True)
+    yields = swap_yield(model, 'GAPD', 'EX_cys__L_e', 'EX_glc_e', biomass_reaction,
+                        print_results=True)
     for y, t in zip(yields, [0.10, 0.18, 0.76]):
         assert_approx_equal(y, t, significant=2)
+
+def test_carbons_for_exchange_reaction():
+    model, biomass_reaction = setup_model('iJO1366')
+    assert carbons_for_exchange_reaction(model.reactions.get_by_id('EX_glc_e')) == 6
+    assert carbons_for_exchange_reaction(model.reactions.get_by_id('EX_cys__L_e')) == 3
+    assert carbons_for_exchange_reaction(model.reactions.get_by_id('EX_nh4_e')) == 0
+    

@@ -2,11 +2,7 @@
 import cobra
 import cobra.io
 from os.path import join
-# import pandas as pd
-# from pandas import DataFrame
-# import visbio
-# import json
-
+import re
 
 model_directory = '/Users/zaking/models/'
 
@@ -85,26 +81,30 @@ def swap_reaction(model, reaction, turn_off_old_reaction=True):
     return model
 
 def max_growth_rate(model, biomass_reaction):
-    model.optimize(new_objective=biomass_reaction)
+    model.optimize(new_objective=model.reactions.get_by_id(str(biomass_reaction)))
     return model.solution.f
 
-def yield_for_product(model, target, sur, target_c, substrate_c):
-    model.optimize(new_objective=model.reactions.get_by_id(target))
+def yield_for_product(model, target, substrate):
+    target_rxn = model.reactions.get_by_id(str(target))
+    substrate_rxn = model.reactions.get_by_id(str(substrate))
+    model.optimize(new_objective=target_rxn)
+    sur = -substrate_rxn.lower_bound
+    target_c = carbons_for_exchange_reaction(target_rxn)
+    substrate_c = carbons_for_exchange_reaction(substrate_rxn)
     return model.solution.f / sur * target_c / substrate_c
 
-def swap_yield(model, reaction_to_swap, target, biomass,
-               sur, target_c, substrate_c,
+def swap_yield(model, reaction_to_swap, target, substrate, biomass,
                min_biomass=lambda mu_max: 0.1, print_results=False):
     
     gr = max_growth_rate(model, biomass)
     biomass = model.reactions.get_by_id(str(biomass))
     biomass.lower_bound = min_biomass(gr)
     model.optimize(new_objective=model.reactions.get_by_id(str(target)))
-    yield_wt = yield_for_product(model, target, sur, target_c, substrate_c)
+    yield_wt = yield_for_product(model, target, substrate)
 
     # swap model
     model_swap = swap_reaction(model.copy(), reaction_to_swap)
-    yield_swap = yield_for_product(model_swap, target, sur, target_c, substrate_c)
+    yield_swap = yield_for_product(model_swap, target, substrate)
     yield_change = (yield_swap - yield_wt) / yield_wt
     
     # print
@@ -114,3 +114,14 @@ def swap_yield(model, reaction_to_swap, target, biomass,
         print 'swap yield\t%.5g' % yield_swap
         print 'change\t%.5g' % yield_change
     return yield_wt, yield_swap, yield_change
+
+def carbons_for_exchange_reaction(reaction):
+    if len(reaction._metabolites) > 1:
+        raise Exception('%s not an exchange reaction' % str(reaction))
+
+    metabolite = reaction._metabolites.iterkeys().next()
+    match = re.match(r'C([0-9]+)', str(metabolite.formula))
+    try:
+        return int(match.group(1))
+    except AttributeError:
+        return 0
