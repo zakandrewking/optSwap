@@ -7,11 +7,33 @@ def test_setup_model():
     assert isinstance(model, cobra.Model)
     assert str(model) == 'iJO1366'
     assert model.reactions.get_by_id('CAT').upper_bound == 0
+    
+    model, biomass_reaction = setup_model('iJO1366-heterologous')
+    assert isinstance(model, cobra.Model)
+    assert str(model) == 'MODELID_4188667'
+    assert isinstance(model.metabolites.lyco_c, cobra.Metabolite)
+    assert isinstance(model.reactions.FPS, cobra.Reaction)
+    assert model.reactions.get_by_id('FPS').lower_bound == 0
+    assert model.reactions.get_by_id('FPS').upper_bound == 0
+    model = turn_on_subsystem(model, 'Lycopene production')
+    assert yield_for_product(model, 'EX_lyco_LPAREN_e_RPAREN_', 'EX_glc_LPAREN_e_RPAREN_') > 0
+    model = turn_on_subsystem(model, 'Caprolactone production')
+    model.optimize(new_objective=model.reactions.get_by_id('CMHO'))
+    assert model.solution.f > 0
 
     model, biomass_reaction = setup_model('iMM904', aerobic=False)
     assert isinstance(model, cobra.Model)
     assert str(model) == 'Saccharomyces cerevisiae model iMM904'
 
+def test_turn_on_subsystem():
+    model, biomass_reaction = setup_model('iJO1366-heterologous')
+    model = turn_on_subsystem(model, '1,3-Propanediol production')
+    assert model.reactions.get_by_id('13PPDH2').upper_bound == 1000
+    assert model.reactions.get_by_id('13PPDH2').lower_bound == -1000
+    model = turn_on_subsystem(model, '1,4-Butanediol production')
+    assert model.reactions.get_by_id('BTDP2').upper_bound == 1000
+    assert model.reactions.get_by_id('BTDP2').lower_bound == 0
+    
 def test_swap_reaction():
     model, biomass_reaction = setup_model('iJO1366', aerobic=False)
     model_swap = swap_reaction(model.copy(), 'GAPD', turn_off_old_reaction=True)
@@ -49,6 +71,16 @@ def test_yield_for_product():
     y = yield_for_product(model, 'EX_etoh_e', 'EX_glc_e')
     assert_approx_equal(y, 0.66, significant=2)
 
+    # TODO fix
+    # model, biomass_reaction = setup_model('iJO1366', aerobic=False, substrate='EX_xyl__D_e')
+    # y = yield_for_product(model, 'EX_cys__L_e', 'EX_xyl__D_e')
+    # assert_approx_equal(y, 0.11, significant=2)
+    
+    model, biomass_reaction = setup_model('iJO1366', aerobic=False, substrate='EX_xyl__D_e')
+    model.reactions.get_by_id(biomass_reaction).lower_bound = 10
+    y = yield_for_product(model, 'EX_cys__L_e', 'EX_xyl__D_e')
+    assert y == 0
+
 def test_swap_yield():
     model, biomass_reaction = setup_model('iJO1366', aerobic=False)
     yields = swap_yield(model, 'GAPD', 'EX_cys__L_e', 'EX_glc_e', biomass_reaction,
@@ -56,6 +88,10 @@ def test_swap_yield():
     for y, t in zip(yields, [0.10, 0.18, 0.76]):
         assert_approx_equal(y, t, significant=2)
 
+    yields = swap_yield(model, 'GAPD', 'EX_cys__L_e', 'EX_glc_e', biomass_reaction,
+                        print_results=True, min_biomass = lambda x: 10)
+    assert yields == (0, 0, 0)
+            
 def test_carbons_for_exchange_reaction():
     model, biomass_reaction = setup_model('iJO1366')
     assert carbons_for_exchange_reaction(model.reactions.get_by_id('EX_glc_e')) == 6

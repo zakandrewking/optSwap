@@ -3,25 +3,108 @@ import cobra
 import cobra.io
 from os.path import join
 import re
+import cPickle as pickle
 
 model_directory = '/Users/zaking/models/'
+
+def add_martinez_pathways(model):
+    """Add pathways for lycopene and e-caprolactone
+
+    From:
+    1. Martínez I, Zhu J, Lin H, et al. Replacing Escherichia coli
+    NAD-dependent glyceraldehyde 3-phosphate dehydrogenase (GAPDH) with a
+    NADP-dependent enzyme from Clostridium acetobutylicum facilitates NADPH
+    dependent pathways. Metab. Eng. 2008;10(6):352–9.
+
+    """
+
+    new_metabolites = { 'ggpp_c': 'C20H33O7P2',
+                        'phyto_c': 'C40H64',
+                        'lyco_c': 'C40H56',
+                        'lyco_e': 'C40H56' }
+    for k, v in new_metabolites.iteritems():
+        m = cobra.Metabolite(id=k, formula=v)
+        model.add_metabolites([m])
+                        
+    new_reactions = { 'FPS': { 'ipdp_c': -2,
+                               'ppi_c': 1,
+                               'grdp_c': 1 },
+                      'crtE': { 'ipdp_c': -1,
+                                'frdp_c': -1,
+                                'ggpp_c': 1,
+                                'ppi_c': 1 },
+                      'crtB': { 'ggpp_c': -2,
+                                'phyto_c': 1,
+                                'ppi_c': 2 },
+                      'crtI': { 'phyto_c': -1,
+                                'nadp_c': -8,
+                                'lyco_c': 1,
+                                'nadph_c': 8 },
+                      'lycotex': { 'lyco_c': -1,
+                                   'lyco_e': 1},
+                      'EX_lyco_LPAREN_e_RPAREN_': { 'lyco_e': -1 },
+                      'CMHO': { 'o2_c': -1,
+                                'nadph_c': -1,
+                                'h_c': -1,
+                                'h2o_c': 1,
+                                'nadp_c': 1 }
+                    }
+    # subsytems
+    subsystems = { 'FPS': 'Lycopene production',
+                   'crtE': 'Lycopene production', 
+                   'crtB': 'Lycopene production',
+                   'crtI': 'Lycopene production',
+                   'lycotex': 'Lycopene production',
+                   'EX_lyco_LPAREN_e_RPAREN_': 'Lycopene production',
+                   'CMHO': 'Caprolactone production' }    
+    # all irreversible
+    reversibility = { 'FPS': 0,
+                      'crtE': 0, 
+                      'crtB': 0,
+                      'crtI': 0,
+                      'lycotex': 0,
+                      'EX_lyco_LPAREN_e_RPAREN_': 0,
+                      'CMHO': 0 }
+    
+    for name, mets in new_reactions.iteritems():
+        r = cobra.Reaction(name=name)
+        m_obj = {}
+        for k, v in mets.iteritems():
+            m_obj[model.metabolites.get_by_id(k)] = v
+        r.add_metabolites(m_obj)
+        r.reversibility = reversibility[name]
+        r.subsystem = subsystems[name]
+        r.lower_bound = 0
+        r.upper_bound = 0
+        model.add_reaction(r)
+    return model
 
 def setup_model(model_name, aerobic=True, min_biomass=0.1,
                 sur=10, our=10, substrate=None):
     if model_name=='iJO1366':
         path = join(model_directory, 'iJO1366_cobrapy.mat')
+        model = cobra.io.load_matlab_model(path)
         o2 = 'EX_o2_e'
         def_substrate = 'EX_glc_e'
         biomass_reaction = 'Ec_biomass_iJO1366_core_53p95M'
+    elif model_name=='iJO1366-heterologous':
+        # sbml import for subsytems
+        path = join(model_directory, 'iJO1366-heterologous-pathways_cobrapy.pickle')
+        with open(path, 'r') as f:
+            model = pickle.load(f)
+        model = add_martinez_pathways(model)
+        o2 = 'EX_o2_LPAREN_e_RPAREN_'
+        def_substrate = 'EX_glc_LPAREN_e_RPAREN_'
+        biomass_reaction = 'Ec_biomass_iJO1366_core_53p95M'
     elif model_name=='iMM904':
         path = join(model_directory, 'iMM904_cobrapy.mat')
+        model = cobra.io.load_matlab_model(path)
         o2 = 'EX_o2(e)'
         def_substrate = 'EX_glc(e)'
         biomass_reaction = 'biomass_SC5_notrace'
     else:
         raise Exception('Unrecognized model name %s' % model_name)
     
-    model = cobra.io.load_matlab_model(path)
             
     substrate = def_substrate if substrate is None else substrate
     model.reactions.get_by_id(def_substrate).lower_bound = 0
@@ -32,7 +115,7 @@ def setup_model(model_name, aerobic=True, min_biomass=0.1,
         model.reactions.get_by_id(o2).lower_bound = 0
         
     # model specific setup
-    if model_name=='iJO1366' and aerobic==False:
+    if (model_name=='iJO1366' or model_name=='iJO1366-heterologous') and aerobic==False:
         for r in ['CAT', 'SPODM', 'SPODMpp']:
             model.reactions.get_by_id(r).lower_bound = 0
             model.reactions.get_by_id(r).upper_bound = 0
@@ -47,11 +130,19 @@ def setup_model(model_name, aerobic=True, min_biomass=0.1,
 
     return model, biomass_reaction
 
+def turn_on_subsystem(model, subsytem):
+    for reaction in model.reactions:
+        if reaction.subsystem.strip('_') == subsytem.strip('_'):
+            reaction.lower_bound = -1000 if reaction.reversibility else 0
+            reaction.upper_bound = 1000
+    return model
+
 def swap_reaction(model, reaction, turn_off_old_reaction=True):
     """Swap a reaction.
 
     Only works for cytosolic NAD(P)H right now.
 
+    TODO accept list of reactions
     TODO replace the replace dictionary (lol) with a regex.
     
     """
@@ -91,10 +182,14 @@ def yield_for_product(model, target, substrate):
     sur = -substrate_rxn.lower_bound
     target_c = carbons_for_exchange_reaction(target_rxn)
     substrate_c = carbons_for_exchange_reaction(substrate_rxn)
+    if sur==0:
+        raise Exception('Substrate uptake rate is zero')
+    if model.solution.f is None:
+        return 0
     return model.solution.f / sur * target_c / substrate_c
 
 def swap_yield(model, reaction_to_swap, target, substrate, biomass,
-               min_biomass=lambda mu_max: 0.1, print_results=False):
+               min_biomass=lambda mu_max: 0.1, print_results=False, value_for_inf=1000):
     
     gr = max_growth_rate(model, biomass)
     biomass = model.reactions.get_by_id(str(biomass))
@@ -105,11 +200,21 @@ def swap_yield(model, reaction_to_swap, target, substrate, biomass,
     # swap model
     model_swap = swap_reaction(model.copy(), reaction_to_swap)
     yield_swap = yield_for_product(model_swap, target, substrate)
-    yield_change = (yield_swap - yield_wt) / yield_wt
+    if yield_wt == 0:
+        if yield_swap == 0:
+            yield_change = 0
+        else:
+            yield_change = value_for_inf
+    else:
+        yield_change = (yield_swap - yield_wt) / yield_wt
     
     # print
     if print_results:
-        print 'µ  = %.5g' % model.solution.f
+        if gr is not None:
+            print 'µ  = %.5g' % gr
+            print 'min_biomass = %.5g' % biomass.lower_bound
+        else:
+            print 'INFEASIBLE'
         print 'wt yield\t%.5g' % yield_wt
         print 'swap yield\t%.5g' % yield_swap
         print 'change\t%.5g' % yield_change
