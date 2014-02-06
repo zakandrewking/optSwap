@@ -26,42 +26,42 @@ def add_martinez_pathways(model):
         m = cobra.Metabolite(id=k, formula=v)
         model.add_metabolites([m])
                         
-    new_reactions = { 'FPS': { 'ipdp_c': -2,
-                               'ppi_c': 1,
-                               'grdp_c': 1 },
-                      'crtE': { 'ipdp_c': -1,
+    new_reactions = { #'FPS': { 'ipdp_c': -2,
+                      #         'ppi_c': 1,
+                      #         'grdp_c': 1 },
+                      'CRTE': { 'ipdp_c': -1,
                                 'frdp_c': -1,
                                 'ggpp_c': 1,
                                 'ppi_c': 1 },
-                      'crtB': { 'ggpp_c': -2,
+                      'CRTB': { 'ggpp_c': -2,
                                 'phyto_c': 1,
                                 'ppi_c': 2 },
-                      'crtI': { 'phyto_c': -1,
+                      'CRTI': { 'phyto_c': -1,
                                 'nadp_c': -8,
                                 'lyco_c': 1,
                                 'nadph_c': 8 },
                       'lycotex': { 'lyco_c': -1,
                                    'lyco_e': 1},
                       'EX_lyco_LPAREN_e_RPAREN_': { 'lyco_e': -1 },
-                      'CMHO': { 'o2_c': -1,
+                      'CMHO': { #'o2_c': -1,
                                 'nadph_c': -1,
-                                'h_c': -1,
-                                'h2o_c': 1,
+                                'h_c': 1,
+                                #'h2o_c': 1,
                                 'nadp_c': 1 }
                     }
     # subsytems
-    subsystems = { 'FPS': 'Lycopene production',
-                   'crtE': 'Lycopene production', 
-                   'crtB': 'Lycopene production',
-                   'crtI': 'Lycopene production',
+    subsystems = { #'FPS': 'Lycopene production',
+                   'CRTE': 'Lycopene production', 
+                   'CRTB': 'Lycopene production',
+                   'CRTI': 'Lycopene production',
                    'lycotex': 'Lycopene production',
                    'EX_lyco_LPAREN_e_RPAREN_': 'Lycopene production',
                    'CMHO': 'Caprolactone production' }    
     # all irreversible
-    reversibility = { 'FPS': 0,
-                      'crtE': 0, 
-                      'crtB': 0,
-                      'crtI': 0,
+    reversibility = { #'FPS': 0,
+                      'CRTE': 0, 
+                      'CRTB': 0,
+                      'CRTI': 0,
                       'lycotex': 0,
                       'EX_lyco_LPAREN_e_RPAREN_': 0,
                       'CMHO': 0 }
@@ -79,8 +79,7 @@ def add_martinez_pathways(model):
         model.add_reaction(r)
     return model
 
-def setup_model(model_name, aerobic=True, min_biomass=0.1,
-                sur=10, our=10, substrate=None):
+def setup_model(model_name, aerobic=True, sur=10, our=10, substrate=None):
     if model_name=='iJO1366':
         path = join(model_directory, 'iJO1366_cobrapy.mat')
         model = cobra.io.load_matlab_model(path)

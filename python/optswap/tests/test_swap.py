@@ -12,9 +12,9 @@ def test_setup_model():
     assert isinstance(model, cobra.Model)
     assert str(model) == 'MODELID_4188667'
     assert isinstance(model.metabolites.lyco_c, cobra.Metabolite)
-    assert isinstance(model.reactions.FPS, cobra.Reaction)
-    assert model.reactions.get_by_id('FPS').lower_bound == 0
-    assert model.reactions.get_by_id('FPS').upper_bound == 0
+    assert isinstance(model.reactions.get_by_id('CRTE'), cobra.Reaction)
+    assert model.reactions.get_by_id('CRTE').lower_bound == 0
+    assert model.reactions.get_by_id('CRTE').upper_bound == 0
     model = turn_on_subsystem(model, 'Lycopene production')
     assert yield_for_product(model, 'EX_lyco_LPAREN_e_RPAREN_', 'EX_glc_LPAREN_e_RPAREN_') > 0
     model = turn_on_subsystem(model, 'Caprolactone production')
