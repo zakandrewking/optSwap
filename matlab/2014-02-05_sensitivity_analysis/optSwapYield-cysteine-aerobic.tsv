@@ -1,0 +1,301 @@
+target	aerobic	substrate	num swaps	thko	f_k	max yield	swaps	time (s)	sur	biomass
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		1.9761		0.1	2.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	2.0149	2.0149	'GAPD';	17.1	2.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	2.0476	2.0476	'GAPD';'PGCD';	17.2	2.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		4.0889		0.1	4.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	4.1638	4.1638	'GAPD';	16.9	4.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	4.2314	4.2314	'GAPD';'PGCD';	16.9	4.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		6.2017		0.1	6.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	6.3128	6.3128	'GAPD';	16.3	6.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	6.4151	6.4151	'GAPD';'PGCD';	16.9	6.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		8.0842		0.1	8.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	8.4617	8.4617	'GAPD';	16.3	8.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	8.5989	8.5989	'GAPD';'PGCD';	16.8	8.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		9.0368		0.1	10.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	9.7425	9.7425	'GAPD';	16.3	10.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	10.1871	10.1871	'GAPD';'PGCD';	16.8	10.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		9.9328		0.1	12.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	10.9935	10.9935	'GAPD';	16.5	12.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	11.4951	11.4951	'GAPD';'PGCD';	16.6	12.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		10.8288		0.1	14.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	12.2193	12.2193	'GAPD';	15.9	14.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	12.8030	12.8030	'GAPD';'PGCD';	16.4	14.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		11.7034		0.1	16.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	13.4044	13.4044	'GAPD';	16.2	16.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	14.1110	14.1110	'GAPD';'PGCD';	16.4	16.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		12.5310		0.1	18.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	14.5896	14.5896	'GAPD';	16.2	18.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	15.4353	15.4353	'GAPD';'PDH';	16.3	18.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		13.3586		0.1	20.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	15.7748	15.7748	'GAPD';	16.1	20.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	16.7948	16.7948	'GAPD';'PDH';	16.4	20.0	0.000	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.7766		0.1	2.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	0.8243	0.8219	'GAPD';	16.1	2.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	0.8287	0.8262	'GAPD';'MDH';	16.1	2.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		2.8894		0.1	4.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	2.9754	2.9731	'GAPD';	16.0	4.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	3.0293	3.0269	'GAPD';'PDH';	16.4	4.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		5.0022		0.1	6.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	5.1244	5.1220	'GAPD';	16.1	6.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	5.2106	5.2082	'GAPD';'PGCD';	16.4	6.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		6.6824		0.1	8.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	7.1205	7.1182	'GAPD';	15.8	8.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	7.3944	7.3920	'GAPD';'PGCD';	16.1	8.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		7.6231		0.1	10.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	8.3714	8.3691	'GAPD';	15.6	10.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	8.7622	8.7599	'GAPD';'PGCD';	16.2	10.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		8.5191		0.1	12.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	9.6223	9.6200	'GAPD';	15.5	12.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	10.0702	10.0678	'GAPD';'PGCD';	16.1	12.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		9.4087		0.1	14.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	10.8526	10.8503	'GAPD';	15.8	14.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	11.4168	11.4146	'GAPD';'PDH';	16.2	14.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		10.2363		0.1	16.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	12.0378	12.0355	'GAPD';	15.7	16.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	12.7763	12.7741	'GAPD';'PDH';	16.0	16.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		11.0639		0.1	18.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	13.2229	13.2207	'GAPD';	15.7	18.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	14.1358	14.1335	'GAPD';'PDH';	16.1	18.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		11.8915		0.1	20.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	14.3777	14.3755	'GAPD';	15.6	20.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	15.4850	15.4827	'GAPD';'PDH';	15.9	20.0	0.113	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	2.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		14.5	2.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		15.0	2.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		1.6899		0.1	4.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	1.7863	1.7815	'GAPD';	15.9	4.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	1.8073	1.8024	'GAPD';'MDH';	16.0	4.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		3.8027		0.1	6.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	3.9360	3.9312	'GAPD';	15.9	6.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	4.0199	4.0151	'GAPD';'PDH';	16.4	6.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		5.2806		0.1	8.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	5.7493	5.7448	'GAPD';	15.7	8.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	6.0389	6.0344	'GAPD';'PDH';	16.0	8.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		6.2095		0.1	10.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	7.0002	6.9957	'GAPD';	15.5	10.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	7.3980	7.3935	'GAPD';'PDH';	15.9	10.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		7.1055		0.1	12.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	8.2511	8.2466	'GAPD';	15.7	12.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	8.7438	8.7393	'GAPD';'PDH';	15.7	12.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		7.9415		0.1	14.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	9.4859	9.4814	'GAPD';	15.3	14.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	10.0896	10.0851	'GAPD';'PDH';	15.6	14.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		8.7691		0.1	16.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	10.6711	10.6666	'GAPD';	15.4	16.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	11.4354	11.4309	'GAPD';'PDH';	15.7	16.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		9.5967		0.1	18.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	11.8221	11.8176	'GAPD';	15.2	18.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	12.7812	12.7766	'GAPD';'PDH';	15.6	18.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		10.4243		0.1	20.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	12.9650	12.9605	'GAPD';	15.3	20.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	14.1270	14.1224	'GAPD';'PDH';	15.7	20.0	0.226	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	2.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		14.0	2.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		14.1	2.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.4903		0.1	4.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	0.5479	0.5405	'GAPD';	15.0	4.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	0.5479	0.5405	'GAPD';'SHK3Dr';	15.5	4.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		2.6031		0.1	6.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	2.7476	2.7405	'GAPD';	15.2	6.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	2.7860	2.7786	'GAPD';'PGCD';	15.6	6.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		3.8788		0.1	8.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	4.3781	4.3714	'GAPD';	15.2	8.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	4.6769	4.6693	'GAPD';'PDH';	15.4	8.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		4.7958		0.1	10.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	5.6291	5.6223	'GAPD';	15.1	10.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	6.0400	6.0332	'GAPD';'PDH';	15.7	10.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		5.6468		0.1	12.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	6.8800	6.8732	'GAPD';	15.3	12.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	7.3858	7.3790	'GAPD';'PDH';	15.5	12.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		6.4744		0.1	14.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	8.1192	8.1125	'GAPD';	15.0	14.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	8.7316	8.7248	'GAPD';'PDH';	15.6	14.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		7.3020		0.1	16.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	9.2665	9.2598	'GAPD';	15.3	16.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	10.0774	10.0706	'GAPD';'PDH';	15.6	16.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		8.1295		0.1	18.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	10.4094	10.4026	'GAPD';	15.2	18.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	11.4232	11.4164	'GAPD';'PDH';	15.7	18.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		8.9571		0.1	20.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	11.5522	11.5455	'GAPD';	15.4	20.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	12.7690	12.7622	'GAPD';'PDH';	15.7	20.0	0.339	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	2.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		14.0	2.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		14.1	2.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	4.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		14.1	4.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		14.3	4.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		1.3462		0.1	6.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	1.5266	1.5167	'GAPD';	15.2	6.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	1.5266	1.5167	'GAPD';'SHK3Dr';	15.6	6.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		2.4770		0.1	8.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	2.9779	2.9688	'GAPD';	15.3	8.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	3.0598	3.0498	'GAPD';'PDH';	15.4	8.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		3.3520		0.1	10.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	4.2265	4.2174	'GAPD';	15.5	10.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	4.4292	4.4192	'GAPD';'PDH';	15.5	10.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		4.1796		0.1	12.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	5.4750	5.4659	'GAPD';	15.2	12.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	5.7986	5.7885	'GAPD';'PDH';	15.6	12.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		5.0072		0.1	14.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	6.7109	6.7019	'GAPD';	15.4	14.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	7.1680	7.1579	'GAPD';'PDH';	15.3	14.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		5.8348		0.1	16.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	7.8538	7.8448	'GAPD';	15.3	16.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	8.5373	8.5273	'GAPD';'PDH';	15.8	16.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		6.6624		0.1	18.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	8.9966	8.9876	'GAPD';	15.6	18.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	9.9067	9.8966	'GAPD';'PDH';	15.9	18.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		7.4900		0.1	20.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	10.1395	10.1305	'GAPD';	15.7	20.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	11.2761	11.2660	'GAPD';'PDH';	16.0	20.0	0.452	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	2.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		14.6	2.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		15.2	2.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	4.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		15.4	4.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		15.3	4.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	6.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	0.0735	0.0609	'PDH';	16.5	6.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	0.0735	0.0609	'PDH';'SHK3Dr';	16.2	6.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		1.0573		0.1	8.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	1.4428	1.4303	'GAPD';	15.9	8.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	1.4428	1.4303	'MDH';'PDH';	16.4	8.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		1.8849		0.1	10.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	2.8079	2.7966	'GAPD';	16.0	10.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	2.8122	2.7996	'GAPD';'PDH';	16.1	10.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		2.7124		0.1	12.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	4.0565	4.0451	'GAPD';	16.0	12.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	4.1816	4.1690	'GAPD';'PDH';	16.3	12.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		3.5400		0.1	14.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	5.2982	5.2869	'GAPD';	16.0	14.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	5.5509	5.5384	'GAPD';'PGCD';	16.4	14.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		4.3676		0.1	16.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	6.4410	6.4298	'GAPD';	16.2	16.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	6.9203	6.9077	'GAPD';'PDH';	16.6	16.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		5.1952		0.1	18.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	7.5839	7.5726	'GAPD';	16.5	18.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	8.2897	8.2771	'GAPD';'PDH';	16.7	18.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		6.0228		0.1	20.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	8.6991	8.6875	'GAPD';	16.4	20.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	9.6590	9.6465	'GAPD';'PDH';	16.7	20.0	0.566	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	2.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		15.7	2.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		14.9	2.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	4.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		15.1	4.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		14.8	4.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	6.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		15.0	6.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		14.9	6.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	8.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		14.9	8.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		14.9	8.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.4177		0.1	10.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	1.1952	1.1801	'GAPD';	16.2	10.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	1.1952	1.1801	'DHDPRy';'GAPD';	16.7	10.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		1.2453		0.1	12.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	2.5645	2.5495	'GAPD';	16.5	12.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	2.5645	2.5495	'GAPD';'SHK3Dr';	16.5	12.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		2.0729		0.1	14.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	3.8854	3.8719	'GAPD';	16.4	14.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	3.9339	3.9188	'GAPD';'PDH';	16.5	14.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		2.9005		0.1	16.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	5.0086	4.9947	'GAPD';	16.6	16.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	5.3033	5.2882	'GAPD';'PDH';	16.5	16.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		3.7280		0.1	18.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	6.1121	6.0981	'GAPD';	16.5	18.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	6.5824	6.5642	'GAPD';'PDH';	16.3	18.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		4.5556		0.1	20.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	7.2155	7.2016	'GAPD';	16.0	20.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	7.8455	7.8274	'GAPD';'PDH';	16.0	20.0	0.679	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	2.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		14.7	2.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		14.1	2.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	4.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		14.1	4.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		14.1	4.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	6.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		14.3	6.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		14.1	6.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	8.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		14.2	8.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		14.1	8.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	10.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		14.0	10.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		14.0	10.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	12.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	0.7022	0.6810	'GAPD';	15.2	12.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	0.7022	0.6810	'GAPD';'PDH';	15.8	12.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.6057		0.1	14.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	1.9654	1.9442	'GAPD';	15.7	14.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	1.9654	1.9442	'GAPD';'HSDy';	15.3	14.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		1.4333		0.1	16.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	3.2285	3.2074	'GAPD';	15.7	16.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	3.2285	3.2074	'GAPD';'SHK3Dr';	15.4	16.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		2.2609		0.1	18.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	4.4917	4.4705	'GAPD';	15.3	18.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	4.4917	4.4705	'GAPD';'PGCD';	15.3	18.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		3.0885		0.1	20.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	5.7319	5.7156	'GAPD';	15.4	20.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	5.7549	5.7337	'GAPD';'PGCD';	15.4	20.0	0.792	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	2.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		13.9	2.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		14.0	2.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.0	4.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		14.1	4.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		14.2	4.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	6.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		14.2	6.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		14.2	6.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.0	8.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		14.0	8.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		14.0	8.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	10.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		14.2	10.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		14.2	10.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	12.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		14.2	12.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		14.2	12.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	14.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		14.3	14.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		14.1	14.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	16.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	1.1379	1.1137	'GAPD';	15.5	16.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	1.1379	1.1137	'GAPD';'SHK3Dr';	15.4	16.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.7937		0.1	18.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	2.4010	2.3768	'GAPD';	15.3	18.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	2.4010	2.3768	'GAPD';'MDH';	15.4	18.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		1.6213		0.1	20.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	3.6642	3.6400	'GAPD';	15.1	20.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	3.6642	3.6400	'GAPD';'HSDy';	15.5	20.0	0.905	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	2.0	1.018	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		13.9	2.0	1.018	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		13.9	2.0	1.018	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	4.0	1.018	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		14.1	4.0	1.018	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		14.1	4.0	1.018	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	6.0	1.018	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		14.2	6.0	1.018	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		14.2	6.0	1.018	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	8.0	1.018	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		14.1	8.0	1.018	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		14.1	8.0	1.018	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	10.0	1.018	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		14.2	10.0	1.018	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		14.2	10.0	1.018	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	12.0	1.018	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		14.0	12.0	1.018	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		14.1	12.0	1.018	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	14.0	1.018	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		14.0	14.0	1.018	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		14.2	14.0	1.018	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	16.0	1.018	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko		0.0000		14.0	16.0	1.018	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko		0.0000		14.0	16.0	1.018	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	18.0	1.018	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	0.3104	0.2831	'GAPD';	15.5	18.0	1.018	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	0.3104	0.2831	'GAPD';'NADH16pp';	15.6	18.0	1.018	
+EX_cys-L(e)	aerobic	EX_glc(e)	0	nothko		0.0000		0.1	20.0	1.018	
+EX_cys-L(e)	aerobic	EX_glc(e)	1	nothko	1.5735	1.5463	'GAPD';	15.2	20.0	1.018	
+EX_cys-L(e)	aerobic	EX_glc(e)	2	nothko	1.5735	1.5463	'GAPD';'MTHFD';	15.3	20.0	1.018	

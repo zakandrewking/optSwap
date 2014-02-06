@@ -20,6 +20,16 @@ function runOptSwapYield(options)
     else
         modelname = 'iJO';
     end        
+    if isfield(options, 'sur')
+        sur = options.sur;
+    else
+        sur = 10
+    end
+    if isfield(options, 'caprolactone')
+        caprolactone = options.caprolactone;
+    else
+        caprolactone = false
+    end
     if isfield(options, 'minBiomass')
         minBiomass = options.minBiomass;
     else
@@ -35,6 +45,10 @@ function runOptSwapYield(options)
     fileId = fopen(logFile, 'a');
 
     [model,biomassRxn] = setupModel(modelname,substrate,aerobicString,thko);
+    model = changeRxnBounds(model, substrate, -sur, 'l');
+    if caprolactone
+        model = makeCaprolactone(model);
+    end
     for i=1:length(targetRxns)
         lTic = tic;
         opt.useCobraSolver = true;
@@ -81,7 +95,9 @@ function runOptSwapYield(options)
             myPrint('\t', []);
         end
         t = toc(lTic);
-        myPrint('%.1f', t);
+        myPrint('%.1f\t', t);
+        myPrint('%.1f\t', sur);
+        myPrint('%.3f\t', minBiomass);
         myPrint('\n',[]);
 
     end

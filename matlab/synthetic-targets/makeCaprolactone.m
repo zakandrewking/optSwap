@@ -3,12 +3,11 @@ function model = makeCaprolactone(model)
 % crtE, crtI, crtB genes from E. herbicola in pK19, KmR
 
     if true
-       model = addReaction(model, 'cap_rxn', ...
-                 {'o2[c]','nadph[c]','h[c]',...
-                  'h2o[c]','nadp[c]'},...
-                 [-1 -2 -2 2 2], 0);
+       model = addReaction(model, 'CMHO', ...
+                 {'nadph[c]','h[c]','nadp[c]'},...
+                 [-1 1 1], 0);
                  model.c(model.c~=0) = 0;
-                 model.c(ismember(model.rxns,'cap_rxn')) = 1;
+                 model.c(ismember(model.rxns,'CMHO')) = 1;
     end
 
 end
