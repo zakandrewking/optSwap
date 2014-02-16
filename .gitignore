@@ -6,3 +6,5 @@
 *.log
 *.pyc
 .#*
+TAGS
+__pycache__/
