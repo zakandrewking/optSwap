@@ -25,6 +25,11 @@ function runOptSwapYield(options)
     else
         sur = 10
     end
+    if isfield(options, 'lycopene')
+        lycopene = options.lycopene;
+    else
+        lycopene = false
+    end
     if isfield(options, 'caprolactone')
         caprolactone = options.caprolactone;
     else
@@ -48,6 +53,9 @@ function runOptSwapYield(options)
     model = changeRxnBounds(model, substrate, -sur, 'l');
     if caprolactone
         model = makeCaprolactone(model);
+    end
+    if lycopene
+        model = makeLycopene(model);
     end
     for i=1:length(targetRxns)
         lTic = tic;

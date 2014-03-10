@@ -155,7 +155,7 @@ function runOptSwap(opt)
     options.knockoutNum = knockoutNum;
     options.interventionNum = interventionNum;
     options.knockableRxns = knockableRxns;
-    notSelectedRxns = reducedModel.rxns(~ismember(reducedModel.rxns,selectedRxns));
+    notSelectedRxns = reducedModel.rxns(~ismember(reducedModel.rxnsh,selectedRxns));
     options.notKnockableRxns = notSelectedRxns;
     options.swapNum = swapNum;
     options.dhRxns = dhRxns;

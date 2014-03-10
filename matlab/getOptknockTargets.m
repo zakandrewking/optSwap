@@ -9,8 +9,8 @@ function [selectedRxns,sets,trimmedSets,geneList,single_KO_GRs,modelRed] = getOp
 %                  stoichiometric model
 % ssExcludeList    List of subsystems that should NOT be included in the
 %                  final list of reaction targets
-% nCarbonThr       defines the min # of carbons that a metabolite, that is
-%                  acted on in a reaction, can have in the final list of reactions
+% nCarbonThr       defines the min # of carbons that a metabolite---that is
+%                  acted on in a reaction---can have in the final list of reactions
 %
 % selectedRxns     The selected targets for deletion in OptKnock
 % single_KO_GRs    The growth rates (GRs) for each knock out (KO) examined

@@ -95,10 +95,10 @@ function [newModel, newNames, coupling] = modelSwap(model,dhRxns,keepWtRxn)
     end
     newModel = model;
 
-    [isValid, foundRxns] = checkESMatrix(newModel);
-    if (~isValid)
-        display(foundRxns)
-        warning(sprintf('invalid S matrix. E*S ~= 0. Found %d bad rxns.', ...
-                      length(foundRxns)))
-    end
+    % [isValid, foundRxns] = checkESMatrix(newModel);
+    % if (~isValid)
+    %     display(foundRxns)
+    %     warning(sprintf('invalid S matrix. E*S ~= 0. Found %d bad rxns.', ...
+    %                   length(foundRxns)))
+    % end
 end

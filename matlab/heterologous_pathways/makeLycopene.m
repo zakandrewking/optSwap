@@ -2,7 +2,7 @@ function model = makeLycopene(model)
 % add reactions for lycopene production
 % crtE, crtI, crtB genes from E. herbicola in pK19, KmR
 
-    if true
+    if false
        model = addReaction(model, 'lyc_rxn', ...
                  {'g3p[c]','pyr[c]','nadph[c]','ctp[c]','atp[c]',...
                   'co2[c]','nadp[c]','cmp[c]','adp[c]','ppi[c]'},...
@@ -12,25 +12,26 @@ function model = makeLycopene(model)
                  return
     end
     
-    newNames = {'FPS',
+    newNames = {% 'FPS',
                'crtE',
                'crtB',
                'crtI',
                 'lycotex',
                'EX_lyco(e)'};
-    newMets = {{'ipdp[c]','ppi[c]', 'grdp[c]'},
+    newMets = {% {'ipdp[c]','ppi[c]', 'grdp[c]'},
                {'ipdp[c]','frdp[c]','ggpp[c]','ppi[c]'},
                {'ggpp[c]', 'phyto[c]', 'ppi[c]'},
                {'phyto[c]', 'nadp[c]', 'lyco[c]', 'nadph[c]'},
               {'lyco[c]','lyco[e]'},
               {'lyco[e]'}};
-    newRxns = {[-2, 1, 1],
+    newRxns = {% [-2, 1, 1],
                [-1, -1, 1, 1],
                [-2, 1, 2],
                [-1, -8, 1, 8],
                [-1, 1],
                [-1]};
-    rev = [0, 0, 0, 0, 0, 0];
+    rev = [% 0,
+           0, 0, 0, 0, 0];
     
     for i=1:length(newNames) 
         model = addReaction(model, newNames{i}, newMets{i}, ...

@@ -25,7 +25,7 @@ function loopOptSwapYieldYeastAnaerobic
         for j=1:length(aer)
             [model, biomass] = setupModel('iMM904',substrates{i},aer{j},'nothko');
             soln_wt = optimizeCbModel(model);
-            opt.minBiomass = 0.1*soln_wt.f;
+            opt.minBiomass = 0.1; %*soln_wt.f;
             fprintf('minBiomass\t%.2f', opt.minBiomass);
             opt.nondefaultReactionBounds = cell(1, length(necessary_ex));
             % only allow the ammount of these exchanges necessary to sustain normal growth
@@ -39,8 +39,7 @@ function loopOptSwapYieldYeastAnaerobic
                 opt.swapNum = swaps(k);
                 opt.logFile = logFile;
                 opt.modelname = 'iMM904';
-                opt.targetRxns = {'EX_hdca(e)'};
-                % opt.targetRxns = yeastTargets(opt.modelname);
+                opt.targetRxns = yeastTargets(opt.modelname);
                 opt.dhRxns = yeastDhPool();
                 runOptSwapYield(opt);
             end

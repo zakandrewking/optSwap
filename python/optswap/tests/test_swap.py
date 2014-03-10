@@ -24,7 +24,19 @@ def test_setup_model():
     model, biomass_reaction = setup_model('iMM904', aerobic=False)
     assert isinstance(model, cobra.Model)
     assert str(model) == 'Saccharomyces cerevisiae model iMM904'
+    
+    model, biomass_reaction = setup_model('iMM904-h', aerobic=False)
+    assert isinstance(model, cobra.Model)
+    assert str(model) == 'Saccharomyces cerevisiae model iMM904'
+    model = turn_on_subsystem(model, 'Caprolactone production')
+    model.optimize(new_objective=model.reactions.get_by_id('CMHO'))
+    assert model.solution.f > 0
 
+    model, biomass_reaction = setup_model('e_coli_core', aerobic=False)
+    assert isinstance(model, cobra.Model)
+    assert str(model) == 'ecoli_core_model'
+    assert [str(x) for x in model.reactions if x.objective_coefficient==1][0] == biomass_reaction
+    
 def test_turn_on_subsystem():
     model, biomass_reaction = setup_model('iJO1366-heterologous')
     model = turn_on_subsystem(model, '1,3-Propanediol production')

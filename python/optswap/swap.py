@@ -79,6 +79,39 @@ def add_martinez_pathways(model):
         model.add_reaction(r)
     return model
 
+def add_cap_yeast(model):
+    """Add pathway for e-caprolactone to yeast model
+
+    From:
+    1. Martínez I, Zhu J, Lin H, et al. Replacing Escherichia coli
+    NAD-dependent glyceraldehyde 3-phosphate dehydrogenase (GAPDH) with a
+    NADP-dependent enzyme from Clostridium acetobutylicum facilitates NADPH
+    dependent pathways. Metab. Eng. 2008;10(6):352–9.
+
+    """
+                        
+    new_reactions = { 'CMHO': { 'nadph[c]': -1,
+                                'h[c]': 1,
+                                'nadp[c]': 1 }
+                    }
+    # subsytems
+    subsystems = { 'CMHO': 'Caprolactone production' }    
+    # all irreversible
+    reversibility = { 'CMHO': 0 }
+    
+    for name, mets in new_reactions.iteritems():
+        r = cobra.Reaction(name=name)
+        m_obj = {}
+        for k, v in mets.iteritems():
+            m_obj[model.metabolites.get_by_id(k)] = v
+        r.add_metabolites(m_obj)
+        r.reversibility = reversibility[name]
+        r.subsystem = subsystems[name]
+        r.lower_bound = 0
+        r.upper_bound = 0
+        model.add_reaction(r)
+    return model
+
 def setup_model(model_name, aerobic=True, sur=10, our=10, substrate=None):
     if model_name=='iJO1366':
         path = join(model_directory, 'iJO1366_cobrapy.mat')
@@ -95,12 +128,31 @@ def setup_model(model_name, aerobic=True, sur=10, our=10, substrate=None):
         o2 = 'EX_o2_LPAREN_e_RPAREN_'
         def_substrate = 'EX_glc_LPAREN_e_RPAREN_'
         biomass_reaction = 'Ec_biomass_iJO1366_core_53p95M'
+    elif model_name=='iAF1260':
+        path = join(model_directory, 'Ec_iAF1260_flux1.xml')
+        model = cobra.io.read_sbml_model(path)
+        o2 = 'EX_o2_e_'
+        def_substrate = 'EX_glc_e_'
+        biomass_reaction = 'Ec_biomass_iAF1260_core_59p81M'
     elif model_name=='iMM904':
         path = join(model_directory, 'iMM904_cobrapy.mat')
         model = cobra.io.load_matlab_model(path)
         o2 = 'EX_o2(e)'
         def_substrate = 'EX_glc(e)'
         biomass_reaction = 'biomass_SC5_notrace'
+    elif model_name=='iMM904-h':
+        path = join(model_directory, 'iMM904_cobrapy.mat')
+        model = cobra.io.load_matlab_model(path)
+        model = add_cap_yeast(model)
+        o2 = 'EX_o2(e)'
+        def_substrate = 'EX_glc(e)'
+        biomass_reaction = 'biomass_SC5_notrace'
+    elif model_name=='e_coli_core':
+        path = join(model_directory, 'ecoli_core_model_cobrapy.mat')
+        model = cobra.io.load_matlab_model(path)
+        o2 = 'EX_o2(e)'
+        def_substrate = 'EX_glc(e)'
+        biomass_reaction = 'Biomass_Ecoli_core_N(w/GAM)-Nmet2'
     else:
         raise Exception('Unrecognized model name %s' % model_name)
     

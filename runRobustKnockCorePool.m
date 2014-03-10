@@ -1,4 +1,4 @@
-function runOptKnockCorePool(opt)
+function runRobustKnockCorePool(opt)
 % runs OptSwap
 % by Zachary King, 8/13/2012
 
@@ -10,7 +10,7 @@ function runOptKnockCorePool(opt)
     if ~exist('opt','var')
         opt = struct();
     end
-    if ~isfield(opt,'knockoutNum'), opt.knockoutNum = 3; end
+    if ~isfield(opt,'knockoutNum'), opt.knockoutNum = 4; end
     if ~isfield(opt, 'targetRxn') opt.targetRxn = 'EX_succ(e)'; end
     if ~isfield(opt, 'startWithKnocks'), opt.startWithKnocks = []; end
     if ~isfield(opt, 'experiment'), opt.experiment = 'succinate_core'; end
@@ -68,7 +68,8 @@ function runOptKnockCorePool(opt)
         modelTR = setupModelForTarget(modelTR, targetRxn);
 
         fprintf('OptKnock with target reaction %s\n', targetRxn);
-        optKnockSol = OptKnock(modelTR, selectedRxnList, options, constrOpt, prevSolutions);
+        error('Unfinished');
+        optKnockSol = OptSwap(modelTR, selectedRxnList, options, constrOpt, prevSolutions);
 
         if ~strcmp(optKnockSol.origStat, 'OPTIMAL') 
             if strcmp(optKnockSol.origStat, 'INTERRUPTED') 
