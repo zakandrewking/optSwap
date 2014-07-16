@@ -35,6 +35,33 @@ function results = optSwap(model, opt)
 %
 % OUTPUTS
 % results
+%     results.knockoutRxns - selected reaction knockouts
+%     results.f_k - objective value
+%     results.chemical - target molecule production
+%
+%     results.raw - raw solver output
+%     results.y - integer solution
+%     results.exitFlag - solver exit flag
+%     results.inform - solver exit detail
+%     results.solver - solver name
+%     results.model - full cobra model
+%     results.C - C matrix
+%     results.A - A matrix
+%     results.B - B matrix
+%     results.lb - lb vector
+%     results.ub - ub vector
+%     results.K - max knockouts
+%     results.L - max swaps
+%     results.X - max knockouts and swaps
+%     results.intVars - integer variable indices
+%     results.yInd - y indices
+%     results.qInd - q indices
+%     results.sInd - s indices
+%     results.organismObjectiveInd - objective reeaction index
+%     results.chemicalInd - target reaction index%
+%     results.coupled - reversibility coupling matrix
+%     results.qsCoupling - swap coupling matrix 
+    
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Set up parameters
