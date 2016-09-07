@@ -1,4 +1,4 @@
-function runOptKnockCorePool(opt)
+function runOptKnockPool(opt) 
 % runs OptSwap
 % by Zachary King, 8/13/2012
 
@@ -11,11 +11,11 @@ function runOptKnockCorePool(opt)
         opt = struct();
     end
     if ~isfield(opt,'knockoutNum'), opt.knockoutNum = 3; end
-    if ~isfield(opt, 'targetRxn') opt.targetRxn = 'EX_succ(e)'; end
+    if ~isfield(opt, 'targetRxn') opt.targetRxn = 'EX_lac-D(e)'; end
     if ~isfield(opt, 'startWithKnocks'), opt.startWithKnocks = []; end
-    if ~isfield(opt, 'experiment'), opt.experiment = 'succinate_core'; end
+    if ~isfield(opt, 'experiment'), opt.experiment = 'lactate_iJO1366'; end
     if ~isfield(opt, 'notes'), opt.notes = ''; end
-    if ~isfield(opt, 'logFile'), opt.logFile = 'core_optknock_pool_log.csv'; end
+    if ~isfield(opt, 'logFile'), opt.logFile = 'iJO1366_optknock_D-lac_pool_log.csv'; end
     if ~isfield(opt, 'aerobicString'), opt.aerobicString = 'anaerobic'; end
     if ~isfield(opt, 'solverParams'), opt.solverParams = struct(); end %seconds
     if ~isfield(opt, 'substrate'), opt.substrate = 'EX_glc(e)'; end
@@ -36,7 +36,7 @@ function runOptKnockCorePool(opt)
 
     global biomassRxn minBiomass
     minBiomass = 0.05;
-    [model, biomassRxn] = setupModel('ecoli_core_model', substrate, aerobicString);
+    [model, biomassRxn] = setupModel('iJO1366', substrate, aerobicString);
     model = changeRxnBounds(model, substrate, -20, 'l');
 
     % edit model with starting swaps/knocks

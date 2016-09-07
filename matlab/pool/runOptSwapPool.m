@@ -1,4 +1,4 @@
-function runOptSwapCorePool(opt)
+function runOptSwapPool(opt)
 % runs OptSwap
 % by Zachary King, 8/13/2012
 
@@ -10,7 +10,8 @@ function runOptSwapCorePool(opt)
     if ~exist('opt','var')
         opt = struct();
     end
-    if ~isfield(opt,'knockoutNum'), opt.knockoutNum = 4; end
+    if ~isfield(opt,'modelName'), opt.modelName = 'iJO1366'; end
+    if ~isfield(opt,'knockoutNum'), opt.knockoutNum = 3; end
     if ~isfield(opt, 'swapNum'), opt.swapNum = 0; end
     if ~isfield(opt, 'interventionNum'), opt.interventionNum = -1; end
     if ~isfield(opt, 'targetRxn')
@@ -18,9 +19,9 @@ function runOptSwapCorePool(opt)
     end
     if ~isfield(opt, 'startWithKnocks'), opt.startWithKnocks = []; end
     if ~isfield(opt, 'startWithSwaps'), opt.startWithSwaps = []; end
-    if ~isfield(opt, 'experiment'), opt.experiment = 'succinate_core'; end
+    if ~isfield(opt, 'experiment'), opt.experiment = 'lactate_iJO1366'; end
     if ~isfield(opt, 'notes'), opt.notes = ''; end
-    if ~isfield(opt, 'logFile'), opt.logFile = 'core_robustknock_pool_log.csv'; end
+    if ~isfield(opt, 'logFile'), opt.logFile = 'iJO1366_lactate_pool_log.csv'; end
     if ~isfield(opt, 'swapAllDhs'), opt.swapAllDhs = false; end
     if ~isfield(opt, 'rxnSet'), opt.rxnSet = {}; end
     if ~isfield(opt, 'aerobicString'), opt.aerobicString = 'anaerobic'; end
@@ -37,6 +38,7 @@ function runOptSwapCorePool(opt)
     end
     
     % make variables local
+    modelName = opt.modelName;
     knockoutNum = opt.knockoutNum;
     swapNum = opt.swapNum;
     interventionNum = opt.interventionNum;
@@ -78,7 +80,7 @@ function runOptSwapCorePool(opt)
 
     global biomassRxn minBiomass
     minBiomass = 0.05;
-    [model, biomassRxn] = setupModel('ecoli_core_model', substrate, aerobicString);
+    [model, biomassRxn] = setupModel(modelName, substrate, aerobicString);
     
     % edit model with starting swaps/knocks
     if ~isempty(startWithKnocks)

@@ -11,13 +11,12 @@ objectiveInd - organizms objective
 knockoutNum - number of knockouts
 maxW - maximal value of dual variables (higher number will be more
 accurate but takes more calculation time)
-optKnockFlag - indicates if optKnock will be calculated 
-robustKnockFlag - indicates if optKnock will be calculated 
+optKnockFlag - indicates if optKnock will be calculated
+robustKnockFlag - indicates if optKnock will be calculated
 fixedGlu - size of fixed glucose reaction
 
 Dependencies
 =========
 
-Requires matlab-startup helper files:
-
-https://github.com/zakandrewking/matlab-startup
+- COBRA Toolbox: http://opencobra.github.io/cobratoolbox/
+- TOMLAB Optimization environment: http://tomopt.com/tomlab/

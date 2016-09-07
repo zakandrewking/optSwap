@@ -1,21 +1,21 @@
-function [newModel, newNames, coupling] = modelSwap(model,dhRxns,keepWtRxn)
+function [newModel, newNames, coupling] = modelSwap(model, dhRxns, keepWtRxn)
 
 % MODELSWAP
-% 
+%
 % Return a model with swapped reactions
-% 
+%
 % INPUTS
 % model
 % dhRxns
 % keepWtRxn
-% 
+%
 % OUTPUTS
 % newModel
 % newNames
 % coupling
-% 
+%
 % Zachary King 9/6/2012
-    
+
     if isempty(dhRxns)
         newModel = model; newNames = []; coupling = [];
         return
@@ -25,7 +25,7 @@ function [newModel, newNames, coupling] = modelSwap(model,dhRxns,keepWtRxn)
     end
 
     newNames = cell(size(dhRxns));
-    
+
     for i=1:length(dhRxns)
 
         % turn off the old dhRxn
@@ -35,13 +35,13 @@ function [newModel, newNames, coupling] = modelSwap(model,dhRxns,keepWtRxn)
         else
             display('Keeping old reaction bounds');
         end
-        
+
         S = full(model.S);
         rxn = S(:,find(ismember(model.rxns,dhRxns{i})));
-        nadInd = find(ismember(model.mets,'nad[c]'));
-        nadhInd = find(ismember(model.mets,'nadh[c]'));
-        nadpInd = find(ismember(model.mets,'nadp[c]'));
-        nadphInd = find(ismember(model.mets,'nadph[c]'));
+        nadInd = find(ismember(model.mets,'nad_c'));
+        nadhInd = find(ismember(model.mets,'nadh_c'));
+        nadpInd = find(ismember(model.mets,'nadp_c'));
+        nadphInd = find(ismember(model.mets,'nadph_c'));
         newRxn = rxn;
 
         if (rxn(nadInd))
@@ -71,22 +71,23 @@ function [newModel, newNames, coupling] = modelSwap(model,dhRxns,keepWtRxn)
         for j=1:length(newMets)
             selRxn(find(ismember(model.mets,newMets{j})),1) = newRxn(j);
         end
-        indOfExisting = find(ismember(model.S',selRxn','rows'));
+        indOfExisting = find(ismember(model.S', selRxn', 'rows'));
         if ~isempty(indOfExisting)
-            if length(indOfExisting)>1, error('multiple copies of reaction found!'); end
+            if length(indOfExisting) > 1
+                error('multiple copies of reaction found!')
+            end
             existingName = model.rxns(indOfExisting(1));
             disp(sprintf('Swap of reaction %s already exists: %s',dhRxns{i}, ...
                  existingName{1}));
             newNames{i} = existingName{1};
         else
-            model = addReaction(model, newNames{i},...
-                            newMets,newRxn,rev);
+            model = addReaction(model, newNames{i}, newMets, newRxn, rev);
         end
-        
-        coupling(i,1:2) = [find(ismember(model.rxns, dhRxns{i})),...
-                                               find(ismember(model.rxns, newNames{i}))];
+
+        coupling(i, 1:2) = [find(ismember(model.rxns, dhRxns{i})), ...
+                            find(ismember(model.rxns, newNames{i}))];
     end
-    
+
     % check for double ups
     a = intersect(coupling(:,1), coupling(:,2));
     if ~isempty(a)

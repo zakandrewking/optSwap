@@ -1,4 +1,4 @@
-function runRobustKnockCorePool(opt)
+function runRobustKnockPool(opt)
 % runs OptSwap
 % by Zachary King, 8/13/2012
 
@@ -10,16 +10,16 @@ function runRobustKnockCorePool(opt)
     if ~exist('opt','var')
         opt = struct();
     end
-    if ~isfield(opt,'knockoutNum'), opt.knockoutNum = 4; end
-    if ~isfield(opt, 'targetRxn') opt.targetRxn = 'EX_succ(e)'; end
+    if ~isfield(opt,'knockoutNum'), opt.knockoutNum = 3; end
+    if ~isfield(opt, 'targetRxn') opt.targetRxn = 'EX_lac-D(e)'; end
     if ~isfield(opt, 'startWithKnocks'), opt.startWithKnocks = []; end
-    if ~isfield(opt, 'experiment'), opt.experiment = 'succinate_core'; end
+    if ~isfield(opt, 'experiment'), opt.experiment = 'lactate_iJO1366_robustknock'; end
     if ~isfield(opt, 'notes'), opt.notes = ''; end
-    if ~isfield(opt, 'logFile'), opt.logFile = 'core_optknock_pool_log.csv'; end
+    if ~isfield(opt, 'logFile'), opt.logFile = 'iJO1366_robustknock_D-lac_pool_log.csv'; end
     if ~isfield(opt, 'aerobicString'), opt.aerobicString = 'anaerobic'; end
     if ~isfield(opt, 'solverParams'), opt.solverParams = struct(); end %seconds
     if ~isfield(opt, 'substrate'), opt.substrate = 'EX_glc(e)'; end
-    if ~isfield(opt, 'useCobraSolver'), opt.useCobraSolver = true; end
+    if ~isfield(opt, 'useCobraSolver'), opt.useCobraSolver = false; end
     
     % make variables local
     knockoutNum = opt.knockoutNum;

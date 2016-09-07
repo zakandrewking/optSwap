@@ -14,14 +14,14 @@ function results = optSwap(model, opt)
 %   interventionNum - maximum number of interventions (-1 to remove the constraint)
 %   knockableRxns - reactions that should definitely be considered for knockout
 %   notKnockableRxns - reactions that should be excluded from knockout set
-% 
+%
 %   useCobraSolver - 0 use TOMLAB CPLEX solver; 1 use COBRA toolbox solver
 %                    NOTE: the COBRA toolbox MILP solver routine does not set the
 %                    following parameters, which are necessary for good results:
 %                        VarWeight, KNAPSACK, fIP, xIP, f_Low, x_min, x_max, f_opt, x_opt
 %                    Therfore, we recommend using the TOMLAB CPLEX solver,
 %                    and setting useCobraSolver = 0.
-% 
+%
 %   maxW - maximal value of dual variables (higher number will be more
 %          accurate but takes more calculation time)
 %   biomassRxn - biomass objective function in the model
@@ -85,13 +85,14 @@ function results = optSwap(model, opt)
           case 1, opt.maxW = 1e7;
           case 0, opt.maxW = 1000;
         end
-    end 
+    end
     if ~isfield(opt,'biomassRxn')
         opt.biomassRxn = model.rxns(model.c~=0);
     end
     if ~isfield(opt,'dhRxns')
-        opt.dhRxns = {'ACALD'; 'ALCD2x'; 'ASAD'; 'DHDPRy'; 'FADRx'; 'G6PDH2r'; ...
-                      'GAPD'; 'GLUDy'; 'GND'; 'HSDy'}; 
+        % defaults for test_models/e_coli_core.mat
+        opt.dhRxns = {'GAPD'; 'ACALD'; 'ALCD2c'; 'G6PDH2r'; 'GLUDy'; 'GND'}
+        % others to consider for testing with iJO1366: 'ASAD'; 'DHDPRy'; 'FADRx'; 'HSDy'
     end
     if ~isfield(opt, 'solverParams'), opt.solverParams = []; end
     if ~isfield(opt, 'allowDehydrogenaseKnockout')
@@ -99,9 +100,9 @@ function results = optSwap(model, opt)
     end
 
     % name global variables
-    global solverParams 
+    global solverParams
     global useCobraSolver debugFlag
-    
+
     % set local variables
     knockType = opt.knockType;
     targetRxn = opt.targetRxn;
@@ -118,10 +119,10 @@ function results = optSwap(model, opt)
     allowDehydrogenaseKnockout = opt.allowDehydrogenaseKnockout;
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
+
     debugFlag = true;
     testDebugFlag();
-    
+
     if (knockType == 2)
         % perform swaps
         [model, newNames, qsCoupling] = modelSwap(model, dhRxns, true);
@@ -131,7 +132,7 @@ function results = optSwap(model, opt)
 
     chemicalInd = find(ismember(model.rxns, targetRxn));
     if debugFlag, display(sprintf('chemical index %d', chemicalInd)); end
-    
+
     %parameters
     findMaxWFlag=0;
     P=1;
@@ -139,7 +140,7 @@ function results = optSwap(model, opt)
     K = knockoutNum;
     L = swapNum;
     X = interventionNum;
-    
+
     disp('preparing model')
     consModel = prepareOptSwapModel(model, chemicalInd, biomassRxn);
 
@@ -149,38 +150,38 @@ function results = optSwap(model, opt)
         createRobustOneWayFluxesModel(consModel, chemicalInd, coupledFlag, ...
                                       knockableRxns, notKnockableRxns, ...
                                       qsCoupling, useCobraSolver);
-  
-    
+
+
     % sizes
     ySize = length(yInd); yCoupledSize = length(yCoupledInd);
     qSize = length(qInd); qCoupledSize = length(qCoupledInd);
     sSize = length(sInd); sCoupledSize = length(sCoupledInd);
     if (qSize ~= sSize)
         error('Dehydrogenases do not match swap reactions.');
-    end 
+    end
     if debugFlag
         display(sprintf('ySize %d, qSize %d, sSize %d',...
-                        ySize, qSize, sSize)); 
+                        ySize, qSize, sSize));
         display(sprintf('yCoupledSize %d, qCoupledSize %d, sCoupledSize %d',...
-                        yCoupledSize, qCoupledSize, sCoupledSize)); 
-    end 
-    
+                        yCoupledSize, qCoupledSize, sCoupledSize));
+    end
+
     % don't sort combination indexes
     % yqsCoupledInd = [yCoupledInd; qCoupledInd; sCoupledInd];
     yqsInd = [yInd; qInd; sInd];
-    
+
     % combined sizes
-    yqsSize = ySize + qSize + sSize; 
+    yqsSize = ySize + qSize + sSize;
     yqsCoupledSize = yCoupledSize + qCoupledSize + sCoupledSize;
-    
+
     % optSwap diverges here
     if (knockType==0 || knockType==1)
 
         coupledYSize = size(yCoupledInd, 1);
         coupledYInd = yCoupledInd;
         notYInd = notYqsInd; coupledNotYInd = notYqsCoupedInd;
-        
-    
+
+
         %part 2
         %max C'v
         %s.t
@@ -377,46 +378,46 @@ function results = optSwap(model, opt)
 
             results = setupAndRunMILP(C3, A3, B3, lb3, ub3, intVars,...
                                       model, yInd, [], [], K, [], [], ...
-                                      [], []); 
+                                      [], []);
         end
-        
+
     % run OptSwap
-    elseif (knockType == 2) 
+    elseif (knockType == 2)
         disp('optSwap');
-        
+
         %part 2
         %max C'v
         %s.t
         %[A,Ay]*[v;y]<=B
         I = eye(m);
-        A=[ 
+        A=[
             model.S;
             -model.S;
             I(notYqsInd,:);
             I(notYqsCoupedInd,:);
             -I(notYqsInd,:);
             -I(notYqsCoupedInd,:);
-            I([yInd; yCoupledInd; qInd; qCoupledInd; sInd; sCoupledInd;],:); 
+            I([yInd; yCoupledInd; qInd; qCoupledInd; sInd; sCoupledInd;],:);
             -I([yInd; yCoupledInd; qInd; qCoupledInd; sInd; sCoupledInd;],:);
           ];
 
         [aSizeRow, vSize] = size(A);
         selYInd = zeros(m,1); selQInd = zeros(m,1); selSInd = zeros(m,1);
         selYInd(yInd) = 1; selQInd(qInd) = 1; selSInd(sInd) = 1;
-        
+
         % Ay1, Aq1, As1
         Ay1=diag(selYInd);
         Ay1(coupled(:,2), :)=Ay1(coupled(:,1), :);
-        Ay1=Ay1*diag(model.ub);     
-        
+        Ay1=Ay1*diag(model.ub);
+
         Aq1=diag(selQInd);
         Aq1(coupled(:,2), :)=Aq1(coupled(:,1), :);
         Aq1=Aq1*diag(model.ub);
-        
+
         As1=diag(selSInd);
         As1(coupled(:,2), :)=As1(coupled(:,1), :);
         As1=As1*diag(model.ub);
-        
+
         for j=1:length(coupled)
             if (model.ub(coupled(j,1)) ~=0)
                 Ay1(coupled(j,2), coupled(j,1)) = ...
@@ -430,20 +431,20 @@ function results = optSwap(model, opt)
                            (model.ub(coupled(j,2)) ./ model.ub(coupled(j,1)));
             end
         end
-        
+
         % Ay2, Aq2, As2
         Ay2=diag(selYInd);
         Ay2(coupled(:,2), :)=Ay2(coupled(:,1), :);
-        Ay2=Ay2*diag(model.lb);     
-        
+        Ay2=Ay2*diag(model.lb);
+
         Aq2=diag(selQInd);
         Aq2(coupled(:,2), :)=Aq2(coupled(:,1), :);
         Aq2=Aq2*diag(model.lb);
-        
+
         As2=diag(selSInd);
         As2(coupled(:,2), :)=As2(coupled(:,1), :);
         As2=As2*diag(model.lb);
-        
+
         for j=1:length(coupled)
             if (model.lb(coupled(j,1)) ~=0)
                 Ay2(coupled(j,2), coupled(j,1)) = ...
@@ -461,27 +462,27 @@ function results = optSwap(model, opt)
         z1 = [find(Ay1); find(Aq1); find(As1)];
         z2 = [find(Ay2); find(Aq2); find(As2)];
         zSize = size([z1;z2],1);
-        
+
         if debugFlag, disp(sprintf('zSize %d', zSize)); end
-        
+
         yqsCoupledSize = length(yCoupledInd) + length(qCoupledInd) + length(sCoupledInd);
         Ayqs = [
-            zeros(2*n+2*(vSize-yqsSize-yqsCoupledSize),yqsSize); 
+            zeros(2*n+2*(vSize-yqsSize-yqsCoupledSize),yqsSize);
             -Ay1(yInd,yqsInd);
-            -Ay1(yCoupledInd,yqsInd);  
+            -Ay1(yCoupledInd,yqsInd);
             -Aq1(qInd,yqsInd);
             -Aq1(qCoupledInd,yqsInd);
             -As1(sInd,yqsInd);
             -As1(sCoupledInd,yqsInd);
             Ay2(yInd,yqsInd);
-            Ay2(yCoupledInd,yqsInd);     
+            Ay2(yCoupledInd,yqsInd);
             Aq2(qInd,yqsInd);
             Aq2(qCoupledInd,yqsInd);
             As2(sInd,yqsInd);
             As2(sCoupledInd,yqsInd);
              ];  %flux boundary constraints
-         
-        
+
+
         %so: [A,Ayqs]x<=B;
         B = [
             zeros(2*n,1);
@@ -489,7 +490,7 @@ function results = optSwap(model, opt)
            model.ub(notYqsCoupedInd);
            -model.lb(notYqsInd);
            -model.lb(notYqsCoupedInd);
-            zeros(2 * (yqsSize + yqsCoupledSize), 1);    
+            zeros(2 * (yqsSize + yqsCoupledSize), 1);
           ];
 
         C=model.organismObjective;
@@ -505,11 +506,11 @@ function results = optSwap(model, opt)
         %max C_w(w  z)'
         %s.t
         %[A_w  Ayqs_w]*(w z y)  <=  B_w
-        
+
         awSizeRow = size(A_w, 1);
-      
+
         %%%%%%%%%%%%%%%%%%%%%%%
-        
+
         %max min Cjoined*x'
         %s.t
         %Ajoined*x  <=  Bjoined
@@ -538,7 +539,7 @@ function results = optSwap(model, opt)
             model.C_chemical;
             zeros(wSize + zSize,1)
                   ];
-        
+
         B2 = - [
             0;
             B;
@@ -552,8 +553,8 @@ function results = optSwap(model, opt)
         [A2_w, Ayqs2_w ,B2_w,C2_w, lb2_w, ub2_w, uSize, ~]=...
             separateTransposeJoin(A2, Ayqs2, B2, C2, yqsSize, ...
                                   1,  vSize+wSize+zSize, ...
-                                  maxW,findMaxWFlag, zSizeOptKnock2); 
-        
+                                  maxW,findMaxWFlag, zSizeOptKnock2);
+
         %max C2_w*x'
         %s.t
         %A2_w*x+Ayqs2_w*y  <=  B2_w
@@ -588,7 +589,7 @@ function results = optSwap(model, opt)
         % feasibility constraint
             B
            ];
-        
+
         % require swap if property is false
         if ~allowDehydrogenaseKnockout
             if debugFlag, display('dehydrogenase knockouts not allowed'); end
@@ -600,7 +601,7 @@ function results = optSwap(model, opt)
         else
             if debugFlag, display('dehydrogenase knockouts are allowed'); end
         end
-        
+
         % add knockout and swap count constraints
         if K >= 0 % knockoutNum
             if debugFlag, fprintf('using K=%d knockoutNum constraint\n',K); end
@@ -626,7 +627,7 @@ function results = optSwap(model, opt)
                   zeros(1, sSize)];
             B3 = [B3; X - ySize - qSize];
         end
-        
+
         C3=[
             C2_w;
             zeros(ACol, 1);
@@ -637,17 +638,17 @@ function results = optSwap(model, opt)
         tmpH=ub2_w(1:uSize + zSizeOptKnock2);
         ysUpperBound = ones(yqsSize, 1);
         lb3 = [
-            tmpL; 
-            model.lb; 
+            tmpL;
+            model.lb;
             zeros(yqsSize,1)
               ];
         ub3 = [
-            tmpH; 
-            model.ub; 
+            tmpH;
+            model.ub;
             ysUpperBound
               ];
         intVars = (A2_wCol + ACol + 1):(A2_wCol + ACol + yqsSize);
-        
+
         results = setupAndRunMILP(C3, A3, B3, lb3, ub3, intVars, ...
                                   model, yInd, qInd, sInd, K, L, X, ...
                                   coupled, qsCoupling);
@@ -672,7 +673,7 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
     x_opt = []; % The optimal integer solution is not known
     VarWeight = []; % No variable priorities, largest fractional part will be used
     KNAPSACK = 0; % First run without the knapsack heuristic
-    
+
     ySize = length(yInd); qSize = length(qInd); sSize = length(sInd);
 
     %solving mip
@@ -691,8 +692,8 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
         MILPproblem.vartype = char(ones(1,length(C)).*double('C'));
         MILPproblem.vartype(intVars) = 'I';
         MILPproblem.csense = char(ones(1,length(B)).*double('L'));
-        
-        [MILPproblem, solverParams] = setParams(MILPproblem, true, solverParams); 
+
+        [MILPproblem, solverParams] = setParams(MILPproblem, true, solverParams);
         disp('Run COBRA MILP')
         Result_cobra = solveCobraMILP(MILPproblem,solverParams);
 
@@ -714,14 +715,14 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
                                  f_Low, x_min, x_max, f_opt, x_opt);
         disp('setParams')
         Prob_OptKnock2 = setParams(Prob_OptKnock2, false, solverParams);
-        
-        disp('tomRun') 
+
+        disp('tomRun')
         if debugFlag, warning('hack to show script hierarchy'); end
         Result_tomRun = tomRun('cplex', Prob_OptKnock2, 10);
 
         if debugFlag, save('raw-results-tomlab','Result_tomRun'); end
 
-        results.raw = Result_tomRun; 
+        results.raw = Result_tomRun;
         results.y = Result_tomRun.x_k(intVars(1:ySize));
         results.q = Result_tomRun.x_k(intVars(ySize+1:ySize+qSize));
         results.s = Result_tomRun.x_k(intVars(ySize+qSize+1:ySize+qSize+sSize));
@@ -731,7 +732,7 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
         results.f_k = Result_tomRun.f_k;
         results.solver = 'tomlab_cplex';
     end
-    
+
     results.model = model;
     results.C = C;
     results.A = A;
@@ -739,7 +740,7 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
     results.lb = lb;
     results.ub = ub;
     results.K = K;
-    results.L = L; 
+    results.L = L;
     results.X = X;
     results.intVars = intVars;
     results.yInd = yInd;
@@ -747,18 +748,18 @@ function results = setupAndRunMILP(C, A, B, lb, ub, intVars,...
     results.sInd = sInd;
     results.organismObjectiveInd = model.organismObjectiveInd;
     results.chemicalInd = model.chemicalInd;
-    
+
     results.knockoutRxns = model.rxns(yInd(results.y==0));
 
     results.coupled = coupled;
-    results.qsCoupling = qsCoupling; 
-    
+    results.qsCoupling = qsCoupling;
+
     if ~isempty(qsCoupling)
         u = qsCoupling(:,1);
         v = qsCoupling(:,2);
         for i=1:size(qsCoupling,1)
             s_to_q(i,1) = results.s(ismember(sInd,v(ismember(u,qInd(i)))));
-        end 
+        end
         results.knockoutDhs = model.rxns(qInd(results.q==0 & s_to_q==0));
         results.knockoutRxns = [results.knockoutRxns; results.knockoutDhs];
         results.swapRxns = model.rxns(qInd(s_to_q==1));
@@ -785,11 +786,11 @@ function consModel=prepareOptSwapModel(model, chemicalInd, biomassRxn)
     [metNum, rxnNum] = size(consModel.S);
     consModel.row_lb=zeros(metNum,1);
     consModel.row_ub=zeros(metNum,1);
-    
+
     % setup chemical objective
     consModel.C_chemical=zeros(rxnNum,1);
     consModel.C_chemical(chemicalInd)=1;
-    
+
     % add chemical index to model
     consModel.chemicalInd = chemicalInd;
 
@@ -802,7 +803,7 @@ function consModel=prepareOptSwapModel(model, chemicalInd, biomassRxn)
     consModel.organismObjectiveInd = biomassInd;
     consModel.organismObjective = zeros(rxnNum,1);
     consModel.organismObjective(biomassInd) = 1;
-    
+
     %remove small  reactions
     sel1 = (consModel.S>-(10^-3) & consModel.S<0);
     sel2 = (consModel.S<(10^-3) & consModel.S>0);

@@ -53,9 +53,9 @@ for k=1:wSize
         if (findMaxFlag==1)
             c_k=zeros(wSize,1); %find maximal value
             c_k(k)=1;
-            Prob=lpAssign(-c_k, A', [], C, zeros(wSize,1), []);
-            Result=tomRun('cplex', Prob, 0);
-            exitFlag=Result.ExitFlag;
+            Prob = lpAssign(-c_k, A', [], C, zeros(wSize,1), []);
+            Result = tomRun('cplex', Prob, 0);
+            exitFlag = Result.ExitFlag;
             res = -Result.f_k;
             if (exitFlag==0 && res > 1e-3) %found a solution
                 wMax(k)=res;
@@ -98,5 +98,3 @@ B_w=[
     ];
 lb_w=zeros(wSize+zSize+ySize, 1);
 ub_w=[highNum*ones(wSize+zSize, 1); yMax*ones(ySize,1)];
-
-
