@@ -15,3 +15,4 @@ Matlab scripts to run methods from these two papers:
 
 - COBRA Toolbox: http://opencobra.github.io/cobratoolbox/
 - TOMLAB Optimization environment: http://tomopt.com/tomlab/
+- Matlab helper files: https://github.com/zakandrewking/matlab-startup
